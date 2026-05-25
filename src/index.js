@@ -17,6 +17,4 @@ connectionInstance()
 })
 .catch((err)=>{
     console.log("error occured here i think ",err);
-    
-    
 })
