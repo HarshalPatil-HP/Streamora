@@ -1,11 +1,4 @@
- 
- 
- /*
-    owner objectId user
-    createdAt date
-    updatedAt date
-    contend string
- */
+
  import mongoose, { Schema } from "mongoose";
  
  let tweetschema=new Schema({

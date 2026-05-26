@@ -1,15 +1,3 @@
- 
-/*
-  uname string
-  udp string
-  uavtaar string
-  createdAt date
-  watchHistory objectId videos
-  email string
-  fullname string
-  password string
-  updatedAt date
-*/
 
 
 import mongoose, { Schema } from "mongoose";

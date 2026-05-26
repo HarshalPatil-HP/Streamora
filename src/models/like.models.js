@@ -1,13 +1,4 @@
- 
- 
- /*
- owner objectId user
-    createdAt date
-    updatedAt date
-    video objectId videos
-    comment objectId comments
-    tweet objectId tweet
- */
+
  import mongoose, { Schema } from "mongoose";
  
  let likeschema=new Schema({

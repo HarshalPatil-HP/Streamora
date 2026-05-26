@@ -1,12 +1,4 @@
- 
- /*
-  owner objectId user
-    createdAt date
-    updatedAt date
-    videos objectId videos
-    name string 
-    description string
- */
+
  import mongoose, { Schema } from "mongoose";
  
  let playlistschema=new Schema({

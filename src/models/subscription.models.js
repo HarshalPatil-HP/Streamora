@@ -1,12 +1,4 @@
- 
- 
- /*
-    owner objectId user
-    createdAt date
-    updatedAt date
-    suscriber objectId user
-    channel objectId user
- */
+
  import mongoose, { Schema } from "mongoose";
  
  let subscriptionschema=new Schema({

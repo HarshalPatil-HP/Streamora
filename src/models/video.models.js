@@ -1,14 +1,4 @@
- /*
- createdAt date
-    updatedAt date
-    thumbnail string
-    owner objectId user
-    title string
-    videofile string
-    views number
-    duration number
-    description string
- */
+
  import mongoose, { Schema } from "mongoose";
   import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
  let videoschema=new Schema({

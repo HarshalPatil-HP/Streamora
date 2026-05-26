@@ -1,12 +1,4 @@
- 
- 
- /*
-  createdAt date
-    updatedAt date
-    owner objectId user
-    contend string
-    video objectId videos
- */
+
  import mongoose, { Schema } from "mongoose";
  import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
  let commentschema=new Schema({
