@@ -3,7 +3,7 @@
 import mongoose, { Schema } from "mongoose";
 import mongooseHook from "mongoose-hook";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken/lib/JsonWebTokenError";
+import jwt from "jsonwebtoken";
 let userschema=new Schema({
     uname:{
         type:String,
@@ -39,7 +39,7 @@ let userschema=new Schema({
     },
     password:{
          type:String,
-        requiredd:[true,"password requiredd"],
+        required:[true,"password requiredd"],
 
     },
     fullname:{
@@ -62,8 +62,8 @@ let userschema=new Schema({
 
 
 userschema.pre("save",async function (next) {
-    if(!this.modified("password")) return next()
-    this.password=bcrypt.hash(this.password,10)
+    if(!this.isModified("password")) return next()
+    this.password=await bcrypt.hash(this.password,10)
     next()
 })
 
@@ -73,8 +73,8 @@ userschema.methods.isPasswordCorrect=async function (password) {
 
 userschema.methods.getaccesstoken=function(){
     return jwt.sign({
-        _id=this._id,
-        email=this.email
+        _id:this._id,
+        email:this.email
     },
     process.env.ACCESS_TOKEN,
     {
@@ -84,7 +84,7 @@ userschema.methods.getaccesstoken=function(){
 }
 userschema.methods.getacrefreshtoken=function(){
     return jwt.sign({
-        _id=this._id,
+        _id:this._id,
        
     },
     process.env.REFRESH_TOKEN,
