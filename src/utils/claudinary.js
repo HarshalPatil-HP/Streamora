@@ -22,10 +22,10 @@ const uploadOnCloudinary = async (localFilePath) => {
         return response;
 
     } catch (error) {
-       
-        fs.unlinkSync(localFilePath);
-        return null;
-    }
+    console.log("CLOUDINARY ERROR DETAILS:", error);
+    fs.unlinkSync(localFilePath);
+    return null;
+}
 }
 
 

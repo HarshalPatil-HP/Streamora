@@ -1,7 +1,7 @@
 
 
 import mongoose, { Schema } from "mongoose";
-import mongooseHook from "mongoose-hook";
+
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 let userschema=new Schema({
@@ -17,7 +17,6 @@ let userschema=new Schema({
     avtar:{
         type:String,
         required:true,
-
     },
     cover:{
           type:String
@@ -61,10 +60,10 @@ let userschema=new Schema({
 )
 
 
-userschema.pre("save",async function (next) {
-    if(!this.isModified("password")) return next()
-    this.password=await bcrypt.hash(this.password,10)
-    next()
+userschema.pre("save", async function () {
+    if (!this.isModified("password")) return;
+    
+    this.password = await bcrypt.hash(this.password, 10);
 })
 
 userschema.methods.isPasswordCorrect=async function (password) {

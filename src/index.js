@@ -1,10 +1,13 @@
 import dotenv from "dotenv"
+dotenv.config({
+    path: './.env' 
+});
 import{app}from "./app.js"
 import connectionInstance from "./db/index.js"
 
-dotenv.config({
-    path:"./.env"
-})
+
+
+
 
 let port=process.env.PORT||8001
 
