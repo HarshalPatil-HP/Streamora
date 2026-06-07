@@ -18,8 +18,10 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 import healthcheckrouter from "./routes/health.routes.js"
+import userRouter from "./routes/user.routes.js"
 
 app.use("/api/v1/healthcheck",healthcheckrouter)    
+app.use("/api/v1/user",userRouter)    
 
 export{app}
 

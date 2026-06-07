@@ -14,12 +14,12 @@ let userschema=new Schema({
         index:true
 
     },
-    udp:{
+    avtar:{
         type:String,
         required:true,
 
     },
-    uavtaar:{
+    cover:{
           type:String
     },
     watchHistory:[
