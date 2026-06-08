@@ -62,4 +62,8 @@ const registerUser = asynchandler(async (req, res) => {
     res.status(201).json(new Apiresolve(200, created, "user created"));
 });
 
+const loginUser = asynchandler(async (req,res)=>{
+    
+})
+
 export { registerUser };
