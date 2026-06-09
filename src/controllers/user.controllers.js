@@ -4,9 +4,25 @@ import { apireject } from "../utils/Apireject.js"
 import { User } from "../models/user.models.js"      
 import { uploadOnCloudinary } from "../utils/claudinary.js"
 
-const registerUser = asynchandler(async (req, res) => {
-    console.log("1. Waiter entered the Kitchen!");
+const genAccessandrefreshtoken = async (userid) => {
+    try {
+        const user = await User.findById(userid)
+        if (!user) {
+            throw new apireject(400, "cant find user!!")
+        }
+    
+        const accesstoken = user.getaccesstoken()
+        const refreshtoken = user.getacrefreshtoken()
+    
+        user.refreshtoken = refreshtoken
+        await user.save({ validateBeforeSave: false })
+        return { accesstoken, refreshtoken }
+    } catch (error) {
+        throw new apireject(400, "vo genarate vale function may gadbad hua hay")
+    }
+}
 
+const registerUser = asynchandler(async (req, res) => {
     const { uname, email, password, fullname } = req.body;
 
     if ([uname, email, password, fullname].some((field) => field?.trim() === "")) {
@@ -28,7 +44,6 @@ const registerUser = asynchandler(async (req, res) => {
        throw new apireject(400, "upload avtar");
     }
 
-    console.log("2. Handing file to Cloudinary...");
     const avtar = await uploadOnCloudinary(avtarLocalpath);
     
     let cover = "";
@@ -40,8 +55,6 @@ const registerUser = asynchandler(async (req, res) => {
         throw new apireject(400, "Cloudinary upload failed");
     }
 
-    console.log("3. Cloudinary done! Saving to Database...");
-    
     let user = await User.create({
         uname: uname.toLowerCase(),
         email,
@@ -57,13 +70,51 @@ const registerUser = asynchandler(async (req, res) => {
        throw new apireject(500, "problem in user creation");
     }
 
-    console.log("4. User Saved! Sending response...");
-    
     res.status(201).json(new Apiresolve(200, created, "user created"));
 });
 
-const loginUser = asynchandler(async (req,res)=>{
+const loginUser = asynchandler(async (req, res) => {
+    const { email, password } = req.body
+
+    if (!email) {
+        throw new apireject(400, "invalid creditials")
+    }
+
+    let user = await User.findOne({
+        $or: [{ email }]
+    });
+
+    if (!user) {
+        throw new apireject(400, "invalid user try signin little boy")
+    }
+
+    const ispass = await user.isPasswordCorrect(password)
     
+    if (!ispass) {
+        throw new apireject(400, "password not match kid")
+    }
+
+    const { accesstoken, refreshtoken } = await genAccessandrefreshtoken(user._id)
+
+    const loggedin = await User.findById(user._id).select("-password -refreshtoken")
+
+    if (!loggedin) {
+        throw new apireject(400, "notlgged in")
+    }
+
+    const option = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production"
+    }
+
+    res.status(200)
+        .cookie("accesstoken", accesstoken, option)
+        .cookie("refreshtoken", refreshtoken, option)
+        .json(new Apiresolve(
+            200,
+            { user: loggedin, accesstoken, refreshtoken },
+            "logged in successully"
+        ))
 })
 
-export { registerUser };
+export { registerUser, loginUser };
