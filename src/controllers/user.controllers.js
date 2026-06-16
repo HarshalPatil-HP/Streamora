@@ -161,6 +161,25 @@ const RefreshAccesstoken=asynchandler(async (req,res)=>{
 
 })
 
+const logoutUser=asynchandler(async(req,res)=>{
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                refreshtoken:undefined,
+            }
+        },{
+            new:true
+        })
+        const options = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production"}
+        return res
+        .status(200)
+        .clearCookie("accesstoken",options)
+        .clearCookie("refreshtoken",options)
+        .json(new Apiresolve(200,{},"logged out successfully"))
+})
 
 
-export { registerUser, loginUser,RefreshAccesstoken };
+export { registerUser, loginUser,RefreshAccesstoken, logoutUser };

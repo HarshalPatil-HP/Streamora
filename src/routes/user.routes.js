@@ -1,7 +1,7 @@
-import { registerUser} from "../controllers/user.controllers.js";
+import { registerUser,logoutUser} from "../controllers/user.controllers.js";
 import {upload} from "../middlewares/multer.middleware.js"
 import { Router } from "express";
-
+import { authmiddleware } from "../middlewares/auth.middleware.js";
 let router=Router();
 
 router.route("/register").post(
@@ -16,6 +16,10 @@ router.route("/register").post(
         }
     ]),registerUser
 )
+
+//second route for logout user
+router.route("/logout").post(authmiddleware,logoutUser)
+
 
 export default router
 
