@@ -181,5 +181,128 @@ const logoutUser=asynchandler(async(req,res)=>{
         .json(new Apiresolve(200,{},"logged out successfully"))
 })
 
+const updatePassword=asynchandler(async(req,res)=>{
+    const {oldpassword,newpassword} = req.body
+    if(!oldpassword || !newpassword){
+        throw new apireject(400,"enter both old and new password")
+    }
+    let user=await User.findById(req.user._id)
+    if(!user){
+        throw new apireject(400,"user not found")
+    }
+    let ispass=await user.isPasswordCorrect(oldpassword)
+    if(!ispass){
+        throw new apireject(400,"old password not match")
+    }
+    user.password=newpassword;
+    await user.save({validateBeforeSave:false})
 
-export { registerUser, loginUser,RefreshAccesstoken, logoutUser };
+    res
+    .status(200)
+    .json(new Apiresolve(200,{},"password updated successfully"))
+
+
+
+    
+})
+
+const getUserProfile=asynchandler(async(req,res)=>{
+    let user=await User.findById(req.user._id).select("-password -refreshtoken")
+    if(!user){
+        throw new apireject(400,"user not found")
+    }
+
+    res
+    .status(200)
+    .json(new Apiresolve(200,user,"user profile fetched successfully"))
+
+})
+
+const updateUserProfile=asynchandler(async(req,res)=>{
+    const {email,fullname} = req.body
+    if(!email || !fullname){
+        throw new apireject(400,"enter both email and fullname")
+    }
+
+    let user=await User.findById(req.user._id)
+    if(!user){
+        throw new apireject(400,"user not found")
+    }
+    const updated=await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                email=email,
+                fullname=fullname
+            }
+        },
+        {new:true}
+    ).select("-password -refreshtoken")
+     if(!updated){
+        throw new apireject(400,"email and fullname not updated")
+    }
+
+    res
+    .status(200)
+    .json(new Apiresolve(200,{},"updated profile"))
+
+
+})
+
+const updateavtar=asynchandler(async(req,res)=>{
+     let avtarLocalpath = req.file.path;
+        if (!avtarLocalpath) {   
+            throw new apireject(400, "upload avtar");
+        }
+
+        const avtar= await uploadOnCloudinary(avtarLocalpath);
+        if (!avtar) {
+            throw new apireject(400, "Cloudinary upload failed");
+        }
+        const updated=await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                avtar:avtar.url
+            }
+        },
+        {new:true}
+    ).select("-password -refreshtoken")
+     if(!updated){
+        throw new apireject(400,"avtar not updated")
+    }
+    res
+    .status(200)
+    .json(new Apiresolve(200,{},"avtar updated successfully"))
+        
+})
+
+const updatecoveravtar=asynchandler(async(req,res)=>{
+    const coverpath=req.file.path
+    if(!coverpath){
+        throw new apireject(400, "upload cover ");
+    }
+    const cover=await uploadOnCloudinary(coverpath);
+    if(!cover){
+        throw new apireject(400, "error while uploading on claudinary");   
+    }
+
+    let updated=await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                cover:cover.url
+            }
+        },
+        {new:true}
+    ).select("-password -refreshtoken")
+     if(!updated){
+        throw new apireject(400,"cover not updated")
+    }
+    res
+    .status(200)
+    .json(new Apiresolve(200,{},"cover updated successfully"))
+})
+
+
+export { registerUser, loginUser,RefreshAccesstoken, logoutUser, updatePassword, getUserProfile, updateUserProfile, updateavtar,updatecoveravtar };

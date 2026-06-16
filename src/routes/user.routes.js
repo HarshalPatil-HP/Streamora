@@ -17,7 +17,6 @@ router.route("/register").post(
     ]),registerUser
 )
 
-//second route for logout user
 router.route("/logout").post(authmiddleware,logoutUser)
 
 
