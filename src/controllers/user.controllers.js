@@ -3,7 +3,7 @@ import { Apiresolve } from "../utils/Apiresolved.js"
 import { apireject } from "../utils/Apireject.js"    
 import { User } from "../models/user.models.js"      
 import { uploadOnCloudinary } from "../utils/claudinary.js"
-
+import { jwt } from "jsonwebtoken"
 const genAccessandrefreshtoken = async (userid) => {
     try {
         const user = await User.findById(userid)
@@ -117,6 +117,50 @@ const loginUser = asynchandler(async (req, res) => {
         ))
 })
 
+const RefreshAccesstoken=asynchandler(async (req,res)=>{
+    const incomingRefresh=req.cookies.refreshtoken
+
+    if(!incomingRefresh){
+        throw new apireject(401,"refresh token required")
+    }
+    try {
+       const decoded= jwt.verify(
+            incomingRefresh,
+            process.env.REFRESH_TOKEN
+        )
+        const user=await User.findById(decoded?._id)
+        if(!user){
+            throw new apireject(401,"invalid refresh token user gadbadi")
+        }
+        if(incomingRefresh !==user?.refreshtoken){
+            throw new apireject(401,"invalid refresh token in in db and req")
+        }
+         const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production"
+    }
+    const {accesstoken,refreshtoken:newrefreshtoken} =await genAccessandrefreshtoken(user._id)
+
+    res
+    .status(200)
+    .cookie("acesstoken",accesstoken,options)
+    .cookie("refreshtoken", newrefreshtoken, options)
+    .json(
+        new Apiresolve(
+            200,
+            {accesstoken,
+                refreshtoken:newrefreshtoken,
+                
+            },
+            "access token refreshtoken genrated successfully"
+        )
+    )
+    } catch (error) {
+        throw new apireject(401,"somethingwent erong while genarting refresh token")
+    }
+
+})
 
 
-export { registerUser, loginUser };
+
+export { registerUser, loginUser,RefreshAccesstoken };
