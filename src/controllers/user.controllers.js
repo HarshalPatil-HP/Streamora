@@ -3,7 +3,7 @@ import { Apiresolve } from "../utils/Apiresolved.js"
 import { apireject } from "../utils/Apireject.js"    
 import { User } from "../models/user.models.js"      
 import { uploadOnCloudinary } from "../utils/claudinary.js"
-import { jwt } from "jsonwebtoken"
+import  jwt  from "jsonwebtoken"
 const genAccessandrefreshtoken = async (userid) => {
     try {
         const user = await User.findById(userid)
@@ -232,8 +232,8 @@ const updateUserProfile=asynchandler(async(req,res)=>{
         req.user._id,
         {
             $set:{
-                email=email,
-                fullname=fullname
+                email:email,
+                fullname:fullname
             }
         },
         {new:true}
@@ -303,6 +303,8 @@ const updatecoveravtar=asynchandler(async(req,res)=>{
     .status(200)
     .json(new Apiresolve(200,{},"cover updated successfully"))
 })
+
+
 
 
 export { registerUser, loginUser,RefreshAccesstoken, logoutUser, updatePassword, getUserProfile, updateUserProfile, updateavtar,updatecoveravtar };
