@@ -1,9 +1,11 @@
 import { asynchandler } from "../utils/asynchandler.js"
-import { Apiresolve } from "../utils/Apiresolved.js" 
+import { Apiresolve } from "../utils/Apiresolved.js"
 import { apireject } from "../utils/Apireject.js"    
 import { User } from "../models/user.models.js"      
 import { uploadOnCloudinary } from "../utils/claudinary.js"
-import  jwt  from "jsonwebtoken"
+import jwt from "jsonwebtoken"
+import mongoose from "mongoose" 
+
 const genAccessandrefreshtoken = async (userid) => {
     try {
         const user = await User.findById(userid)
@@ -117,195 +119,187 @@ const loginUser = asynchandler(async (req, res) => {
         ))
 })
 
-const RefreshAccesstoken=asynchandler(async (req,res)=>{
-    const incomingRefresh=req.cookies.refreshtoken
+const RefreshAccesstoken = asynchandler(async (req, res) => {
+    const incomingRefresh = req.cookies.refreshtoken
 
-    if(!incomingRefresh){
-        throw new apireject(401,"refresh token required")
+    if (!incomingRefresh) {
+        throw new apireject(401, "refresh token required")
     }
     try {
-       const decoded= jwt.verify(
+        const decoded = jwt.verify(
             incomingRefresh,
             process.env.REFRESH_TOKEN
         )
-        const user=await User.findById(decoded?._id)
-        if(!user){
-            throw new apireject(401,"invalid refresh token user gadbadi")
+        const user = await User.findById(decoded?._id)
+        if (!user) {
+            throw new apireject(401, "invalid refresh token user gadbadi")
         }
-        if(incomingRefresh !==user?.refreshtoken){
-            throw new apireject(401,"invalid refresh token in in db and req")
+        if (incomingRefresh !== user?.refreshtoken) {
+            throw new apireject(401, "invalid refresh token in in db and req")
         }
-         const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production"
-    }
-    const {accesstoken,refreshtoken:newrefreshtoken} =await genAccessandrefreshtoken(user._id)
+        const options = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production"
+        }
+        const { accesstoken, refreshtoken: newrefreshtoken } = await genAccessandrefreshtoken(user._id)
 
-    res
-    .status(200)
-    .cookie("acesstoken",accesstoken,options)
-    .cookie("refreshtoken", newrefreshtoken, options)
-    .json(
-        new Apiresolve(
-            200,
-            {accesstoken,
-                refreshtoken:newrefreshtoken,
-                
-            },
-            "access token refreshtoken genrated successfully"
-        )
-    )
+        res
+            .status(200)
+            .cookie("accesstoken", accesstoken, options) 
+            .cookie("refreshtoken", newrefreshtoken, options)
+            .json(
+                new Apiresolve(
+                    200,
+                    {
+                        accesstoken,
+                        refreshtoken: newrefreshtoken,
+                    },
+                    "access token refreshtoken genrated successfully"
+                )
+            )
     } catch (error) {
-        throw new apireject(401,"somethingwent erong while genarting refresh token")
+        throw new apireject(401, "somethingwent erong while genarting refresh token")
     }
-
 })
 
-const logoutUser=asynchandler(async(req,res)=>{
+const logoutUser = asynchandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
-                refreshtoken:undefined,
+            $set: {
+                refreshtoken: undefined,
             }
-        },{
-            new:true
-        })
-        const options = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production"}
-        return res
+        }, {
+        new: true
+    })
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production"
+    }
+    return res
         .status(200)
-        .clearCookie("accesstoken",options)
-        .clearCookie("refreshtoken",options)
-        .json(new Apiresolve(200,{},"logged out successfully"))
+        .clearCookie("accesstoken", options)
+        .clearCookie("refreshtoken", options)
+        .json(new Apiresolve(200, {}, "logged out successfully"))
 })
 
-const updatePassword=asynchandler(async(req,res)=>{
-    const {oldpassword,newpassword} = req.body
-    if(!oldpassword || !newpassword){
-        throw new apireject(400,"enter both old and new password")
+const updatePassword = asynchandler(async (req, res) => {
+    const { oldpassword, newpassword } = req.body
+    if (!oldpassword || !newpassword) {
+        throw new apireject(400, "enter both old and new password")
     }
-    let user=await User.findById(req.user._id)
-    if(!user){
-        throw new apireject(400,"user not found")
+    let user = await User.findById(req.user._id)
+    if (!user) {
+        throw new apireject(400, "user not found")
     }
-    let ispass=await user.isPasswordCorrect(oldpassword)
-    if(!ispass){
-        throw new apireject(400,"old password not match")
+    let ispass = await user.isPasswordCorrect(oldpassword)
+    if (!ispass) {
+        throw new apireject(400, "old password not match")
     }
-    user.password=newpassword;
-    await user.save({validateBeforeSave:false})
+    user.password = newpassword;
+    await user.save({ validateBeforeSave: false })
 
     res
-    .status(200)
-    .json(new Apiresolve(200,{},"password updated successfully"))
-
-
-
-    
+        .status(200)
+        .json(new Apiresolve(200, {}, "password updated successfully"))
 })
 
-const getUserProfile=asynchandler(async(req,res)=>{
-    let user=await User.findById(req.user._id).select("-password -refreshtoken")
-    if(!user){
-        throw new apireject(400,"user not found")
+const getUserProfile = asynchandler(async (req, res) => {
+    let user = await User.findById(req.user._id).select("-password -refreshtoken")
+    if (!user) {
+        throw new apireject(400, "user not found")
     }
 
     res
-    .status(200)
-    .json(new Apiresolve(200,user,"user profile fetched successfully"))
-
+        .status(200)
+        .json(new Apiresolve(200, user, "user profile fetched successfully"))
 })
 
-const updateUserProfile=asynchandler(async(req,res)=>{
-    const {email,fullname} = req.body
-    if(!email || !fullname){
-        throw new apireject(400,"enter both email and fullname")
+const updateUserProfile = asynchandler(async (req, res) => {
+    const { email, fullname } = req.body
+    if (!email || !fullname) {
+        throw new apireject(400, "enter both email and fullname")
     }
 
-    let user=await User.findById(req.user._id)
-    if(!user){
-        throw new apireject(400,"user not found")
+    let user = await User.findById(req.user._id)
+    if (!user) {
+        throw new apireject(400, "user not found")
     }
-    const updated=await User.findByIdAndUpdate(
+    const updated = await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
-                email:email,
-                fullname:fullname
+            $set: {
+                email: email,
+                fullname: fullname
             }
         },
-        {new:true}
+        { new: true }
     ).select("-password -refreshtoken")
-     if(!updated){
-        throw new apireject(400,"email and fullname not updated")
+    if (!updated) {
+        throw new apireject(400, "email and fullname not updated")
     }
 
     res
-    .status(200)
-    .json(new Apiresolve(200,{},"updated profile"))
-
-
+        .status(200)
+        .json(new Apiresolve(200, {}, "updated profile"))
 })
 
-const updateavtar=asynchandler(async(req,res)=>{
-     let avtarLocalpath = req.file.path;
-        if (!avtarLocalpath) {   
-            throw new apireject(400, "upload avtar");
-        }
+const updateavtar = asynchandler(async (req, res) => {
+    let avtarLocalpath = req.file?.path;
+    if (!avtarLocalpath) {   
+        throw new apireject(400, "upload avtar");
+    }
 
-        const avtar= await uploadOnCloudinary(avtarLocalpath);
-        if (!avtar) {
-            throw new apireject(400, "Cloudinary upload failed");
-        }
-        const updated=await User.findByIdAndUpdate(
+    const avtar = await uploadOnCloudinary(avtarLocalpath);
+    if (!avtar) {
+        throw new apireject(400, "Cloudinary upload failed");
+    }
+    const updated = await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
-                avtar:avtar.url
+            $set: {
+                avtar: avtar.url
             }
         },
-        {new:true}
+        { new: true }
     ).select("-password -refreshtoken")
-     if(!updated){
-        throw new apireject(400,"avtar not updated")
+    if (!updated) {
+        throw new apireject(400, "avtar not updated")
     }
     res
-    .status(200)
-    .json(new Apiresolve(200,{},"avtar updated successfully"))
-        
+        .status(200)
+        .json(new Apiresolve(200, {}, "avtar updated successfully"))
 })
 
-const updatecoveravtar=asynchandler(async(req,res)=>{
-    const coverpath=req.file.path
-    if(!coverpath){
+const updatecoveravtar = asynchandler(async (req, res) => {
+    const coverpath = req.file?.path
+    if (!coverpath) {
         throw new apireject(400, "upload cover ");
     }
-    const cover=await uploadOnCloudinary(coverpath);
-    if(!cover){
+    const cover = await uploadOnCloudinary(coverpath);
+    if (!cover) {
         throw new apireject(400, "error while uploading on claudinary");   
     }
 
-    let updated=await User.findByIdAndUpdate(
+    let updated = await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set:{
-                cover:cover.url
+            $set: {
+                cover: cover.url
             }
         },
-        {new:true}
+        { new: true }
     ).select("-password -refreshtoken")
-     if(!updated){
-        throw new apireject(400,"cover not updated")
+    if (!updated) {
+        throw new apireject(400, "cover not updated")
     }
     res
-    .status(200)
-    .json(new Apiresolve(200,{},"cover updated successfully"))
+        .status(200)
+        .json(new Apiresolve(200, {}, "cover updated successfully"))
 })
 
 
- const getuserchannelprofile = asynchandler(async (req, res) => {
+const getuserchannelprofile = asynchandler(async (req, res) => {
     const { uname } = req.params;
     
     if (!uname?.trim()) {
@@ -318,7 +312,7 @@ const updatecoveravtar=asynchandler(async(req,res)=>{
                 uname: uname.toLowerCase()
             }
         },
-        {   // Lookup to get subscribers
+        {   
             $lookup: {
                 from: "subscriptions", 
                 localField: "_id",
@@ -326,7 +320,7 @@ const updatecoveravtar=asynchandler(async(req,res)=>{
                 as: "subscribers"
             }
         },
-        {   // Lookup to get subscribed channels
+        {   
             $lookup: {
                 from: "subscriptions", 
                 localField: "_id",
@@ -361,7 +355,6 @@ const updatecoveravtar=asynchandler(async(req,res)=>{
                 avtar: 1,
                 cover: 1,
                 email: 1
-                
             }
         }
     ]);
@@ -369,7 +362,6 @@ const updatecoveravtar=asynchandler(async(req,res)=>{
     if (!channel?.length) {
         throw new apireject(404, "Channel not found");
     }
-    console.log(channel[0])
 
     return res.status(200).json(
         new Apiresolve(
@@ -380,56 +372,55 @@ const updatecoveravtar=asynchandler(async(req,res)=>{
     );
 });
 
-const getWatchHistory=asynchandler(async(req,res)=>{
+const getWatchHistory = asynchandler(async (req, res) => {
     const user = await User.aggregate([
         {
             $match: { 
-                _id: mongoose.Types.ObjectId(req.user._id)
+                _id: new mongoose.Types.ObjectId(req.user._id) // FIXED: Added 'new' keyword to avoid crashes
             }
         },{
             $lookup: {
                 from: "videos",
-                localField: "watchhistory",
+                localField: "watchHistory", // FIXED: Changed to camelCase to match database schema
                 foreignField: "_id",
-                as: "watchhistorydetails",
-                  pipeline: [
-                {
-                    $lookup: {
-                        from: "users",
-                        localField: "owner",
-                        foreignField: "_id",
-                        as: "ownerDetails",
-                        pipeline: [
-                            {
-                                $project: {
-                                    fullname: 1,
-                                    uname: 1,
-                                    avtar: 1
+                as: "watchHistoryDetails",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "ownerDetails",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fullname: 1,
+                                        uname: 1,
+                                        avtar: 1
+                                    }
                                 }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields: {
+                            ownerDetails: { // FIXED: Added the missing key name before $first
+                                $first: "$ownerDetails"
                             }
-                        ]
+                        }
                     }
-                    
-                },
-                {
-                    $addFields: {
-                        $first: "$ownerDetails"
-                    }
-                }
-                
-            ]
+                ]
             }
-          
         }
-
     ])
-        if(!user?.length){  
-            throw new apireject(404,"user not found")
-        }
-        res
+    
+    if (!user?.length) {  
+        throw new apireject(404, "user not found")
+    }
+    
+    res
         .status(200)
-        .json(new Apiresolve(200,user[0].watchhistorydetails,"watch history fetched successfully"))
+        .json(new Apiresolve(200, user[0].watchHistoryDetails, "watch history fetched successfully"))
 })
 
-
-export { registerUser, loginUser,RefreshAccesstoken, logoutUser, updatePassword, getUserProfile, updateUserProfile, updateavtar,updatecoveravtar,getuserchannelprofile,getWatchHistory };
+export { registerUser, loginUser, RefreshAccesstoken, logoutUser, updatePassword, getUserProfile, updateUserProfile, updateavtar, updatecoveravtar, getuserchannelprofile, getWatchHistory };
