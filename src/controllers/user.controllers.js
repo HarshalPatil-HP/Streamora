@@ -380,6 +380,56 @@ const updatecoveravtar=asynchandler(async(req,res)=>{
     );
 });
 
+const getWatchHistory=asynchandler(async(req,res)=>{
+    const user = await User.aggregate([
+        {
+            $match: { 
+                _id: mongoose.Types.ObjectId(req.user._id)
+            }
+        },{
+            $lookup: {
+                from: "videos",
+                localField: "watchhistory",
+                foreignField: "_id",
+                as: "watchhistorydetails",
+                  pipeline: [
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "owner",
+                        foreignField: "_id",
+                        as: "ownerDetails",
+                        pipeline: [
+                            {
+                                $project: {
+                                    fullname: 1,
+                                    uname: 1,
+                                    avtar: 1
+                                }
+                            }
+                        ]
+                    }
+                    
+                },
+                {
+                    $addFields: {
+                        $first: "$ownerDetails"
+                    }
+                }
+                
+            ]
+            }
+          
+        }
+
+    ])
+        if(!user?.length){  
+            throw new apireject(404,"user not found")
+        }
+        res
+        .status(200)
+        .json(new Apiresolve(200,user[0].watchhistorydetails,"watch history fetched successfully"))
+})
 
 
-export { registerUser, loginUser,RefreshAccesstoken, logoutUser, updatePassword, getUserProfile, updateUserProfile, updateavtar,updatecoveravtar,getuserchannelprofile };
+export { registerUser, loginUser,RefreshAccesstoken, logoutUser, updatePassword, getUserProfile, updateUserProfile, updateavtar,updatecoveravtar,getuserchannelprofile,getWatchHistory };
