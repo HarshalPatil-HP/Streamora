@@ -305,6 +305,81 @@ const updatecoveravtar=asynchandler(async(req,res)=>{
 })
 
 
+ const getuserchannelprofile = asynchandler(async (req, res) => {
+    const { uname } = req.params;
+    
+    if (!uname?.trim()) {
+        throw new apireject(400, "Username is required");
+    }
+
+    const channel = await User.aggregate([
+        { 
+            $match: {
+                uname: uname.toLowerCase()
+            }
+        },
+        {   // Lookup to get subscribers
+            $lookup: {
+                from: "subscriptions", 
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {   // Lookup to get subscribed channels
+            $lookup: {
+                from: "subscriptions", 
+                localField: "_id",
+                foreignField: "owneruser",
+                as: "subscribedChannels"
+            }
+        },
+        {
+            $addFields: {
+                subscribersCount: {
+                    $size: "$subscribers"
+                },
+                subscribedChannelsCount: {
+                    $size: "$subscribedChannels"
+                },
+                issubscribed: {
+                    $cond: {
+                        if: { $in: [req.user?._id, "$subscribers.subscriber"] }, 
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                fullname: 1,
+                uname: 1,
+                subscribersCount: 1,
+                subscribedChannelsCount: 1,
+                issubscribed: 1,
+                avtar: 1,
+                cover: 1,
+                email: 1
+                
+            }
+        }
+    ]);
+
+    if (!channel?.length) {
+        throw new apireject(404, "Channel not found");
+    }
+    console.log(channel[0])
+
+    return res.status(200).json(
+        new Apiresolve(
+            200, 
+            channel[0], 
+            "Channel profile fetched successfully"
+        )
+    );
+});
 
 
-export { registerUser, loginUser,RefreshAccesstoken, logoutUser, updatePassword, getUserProfile, updateUserProfile, updateavtar,updatecoveravtar };
+
+export { registerUser, loginUser,RefreshAccesstoken, logoutUser, updatePassword, getUserProfile, updateUserProfile, updateavtar,updatecoveravtar,getuserchannelprofile };
