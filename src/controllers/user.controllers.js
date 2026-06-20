@@ -423,4 +423,4 @@ const getWatchHistory = asynchandler(async (req, res) => {
         .json(new Apiresolve(200, user[0].watchHistoryDetails, "watch history fetched successfully"))
 })
 
-export { registerUser, loginUser, RefreshAccesstoken, logoutUser, updatePassword, getUserProfile, updateUserProfile, updateavtar, updatecoveravtar, getuserchannelprofile, getWatchHistory };
+export { registerUser, loginUser, RefreshAccesstoken, logoutUser, updatePassword, getUserProfile, updateUserProfile, updateavtar, updatecoveravtar, getuserchannelprofile, getWatchHistory};

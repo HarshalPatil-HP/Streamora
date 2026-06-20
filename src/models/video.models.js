@@ -1,6 +1,6 @@
 
  import mongoose, { Schema } from "mongoose";
-  import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+ import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
  let videoschema=new Schema({
      discription:{
          type:String,
