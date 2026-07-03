@@ -8,8 +8,54 @@ import {uploadOnCloudinary} from "../utils/claudinary.js"
 
 
 const getAllVideos = asynchandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
-    //TODO: get all videos based on query, sort, pagination
+    /*   
+    
+📍 Step 6: The Pagination Execution (The Slicer)
+What: Chop the massive list of videos down to a small chunk (like 10 videos) and actually run the database query.
+
+Why: Fetching 50,000 videos at once will crash your server and burn through your database bandwidth. Sending 10 at a time is fast and efficient.
+
+How: We will take our entire pipeline array from Step 2, and pass it into the Video.aggregatePaginate() function along with our page and limit numbers.
+
+📍 Step 7: Send the Parcel (The Delivery)
+What: Package the final 10 videos and send them to the frontend with a success message.
+
+Why: The frontend needs a structured JSON response to physically draw the video thumbnails on the screen.
+
+How: We use our standard res.status(200).json(...) structure with our custom Apiresolve class.
+    */
+    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+const pipeline = [];
+
+// 1. First Push: Search Query
+if (query) {
+    pipeline.push({
+        $match: {
+            title: {
+                $regex: query,
+                $options: "i"
+            }
+        }
+    });
+}
+
+// 2. Second Push: Channel Filter
+if (userId) {
+    pipeline.push({
+        $match: {
+            owner: userId // (Note: We usually convert this to mongoose.Types.ObjectId(userId) !)
+        }
+    });
+}
+
+// 3. Third Push: Sorting
+if (sortBy && sortType) {
+    pipeline.push({
+        $sort: {
+            [sortBy]: sortType === "asc" ? 1 : -1
+        }
+    });
+}
     
 })
 
