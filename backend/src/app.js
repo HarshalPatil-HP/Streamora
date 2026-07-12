@@ -1,6 +1,10 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import path from "path"
+import { fileURLToPath } from "url"
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 let app = express()
 
@@ -11,7 +15,7 @@ app.use(cors({
 
 app.use(express.json({ limit: "16kb" }))
 app.use(express.urlencoded({ extended: true, limit: "16kb" }))
-app.use(express.static("public"))
+app.use(express.static(path.join(__dirname, "../public")))
 app.use(cookieParser())
 
 import healthcheckrouter from "./routes/health.routes.js"

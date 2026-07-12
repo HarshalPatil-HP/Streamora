@@ -1,19 +1,20 @@
-import { HomePage } from "./pages/HomePage.js";
-import { WatchPage } from "./pages/WatchPage.js";
-import { TweetFeedPage } from "./pages/TweetFeedPage.js";
-import { ChannelPage } from "./pages/ChannelPage.js";
-import { DashboardPage } from "./pages/DashboardPage.js";
-import { LoginPage } from "./pages/LoginPage.js";
-import { SignupPage } from "./pages/SignupPage.js";
+import { HomePage, mountHomePage } from "./pages/HomePage.js";
+import { WatchPage, mountWatchPage } from "./pages/WatchPage.js";
+import { TweetFeedPage, mountTweetFeedPage } from "./pages/TweetFeedPage.js";
+import { ChannelPage, mountChannelPage } from "./pages/ChannelPage.js";
+import { DashboardPage, mountDashboardPage } from "./pages/DashboardPage.js";
+import { LoginPage, mountLoginPage } from "./pages/LoginPage.js";
+import { SignupPage, mountSignupPage } from "./pages/SignupPage.js";
+import { getAuthState } from "./context/authContext.js";
 
 const routes = [
-  { path: "/", component: HomePage, layout: true },
-  { path: "/tweets", component: TweetFeedPage, layout: true },
-  { path: "/dashboard", component: DashboardPage, layout: true },
-  { path: "/watch/:id", component: WatchPage, layout: true },
-  { path: "/channel/:username", component: ChannelPage, layout: true },
-  { path: "/login", component: LoginPage, layout: false },
-  { path: "/signup", component: SignupPage, layout: false },
+  { path: "/", component: HomePage, mount: mountHomePage, layout: true, public: true },
+  { path: "/tweets", component: TweetFeedPage, mount: mountTweetFeedPage, layout: true, public: true },
+  { path: "/dashboard", component: DashboardPage, mount: mountDashboardPage, layout: true, protected: true },
+  { path: "/watch/:id", component: WatchPage, mount: mountWatchPage, layout: true, public: true },
+  { path: "/channel/:username", component: ChannelPage, mount: mountChannelPage, layout: true, public: true },
+  { path: "/login", component: LoginPage, mount: mountLoginPage, layout: false, guestOnly: true },
+  { path: "/signup", component: SignupPage, mount: mountSignupPage, layout: false, guestOnly: true },
 ];
 
 function matchRoute(pathname) {
@@ -42,47 +43,65 @@ function matchRoute(pathname) {
 
 export function parseHash() {
   const hash = window.location.hash.slice(1) || "/";
-  const [pathPart] = hash.split("?");
+  const [pathPart, queryPart] = hash.split("?");
   const pathname = pathPart || "/";
   const matched = matchRoute(pathname);
+
+  const query = Object.fromEntries(new URLSearchParams(queryPart || ""));
 
   if (matched) {
     return {
       pathname,
-      params: matched.params,
+      params: { ...matched.params, ...query },
       route: matched.route,
       notFound: false,
     };
   }
 
-  return {
-    pathname,
-    params: {},
-    route: routes[0],
-    notFound: true,
-  };
+  return { pathname, params: query, route: null, notFound: true };
 }
 
 export function navigate(path) {
   window.location.hash = path.startsWith("#") ? path : `#${path}`;
 }
 
+export function getRedirectPath() {
+  const { params } = parseHash();
+  return params.redirect || null;
+}
+
 export function getRouteRenderer() {
-  return (pathname, params) => {
+  return async (pathname, params) => {
     const matched = matchRoute(pathname);
+
     if (!matched) {
-      return {
-        html: HomePage(),
-        layout: true,
-        notFound: true,
-      };
+      return { html: "", layout: true, notFound: true, mount: null, route: null };
     }
 
     const { route, params: routeParams } = matched;
+    const allParams = { ...routeParams, ...params };
+    const { isAuthenticated } = getAuthState();
+
+    if (route.protected && !isAuthenticated) {
+      const redirect = encodeURIComponent(pathname);
+      navigate(`/login?redirect=${redirect}`);
+      return { html: "", layout: false, blocked: true, mount: null, route: null, params: allParams };
+    }
+
+    if (route.guestOnly && isAuthenticated) {
+      navigate("/");
+      return { html: "", layout: true, blocked: true, mount: null, route: null, params: allParams };
+    }
+
+    const html = await route.component(allParams);
+
     return {
-      html: route.component({ ...routeParams, ...params }),
+      html,
       layout: route.layout,
       notFound: false,
+      mount: route.mount,
+      params: allParams,
+      route,
     };
   };
 }
