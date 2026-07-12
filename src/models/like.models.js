@@ -1,42 +1,25 @@
 
- import mongoose, { Schema } from "mongoose";
- 
- let likeschema=new Schema({
-     
- 
-   
-     owner:[
-         {
-             type:Schema.Types.ObjectId,
-             ref:"User"
-         }
-     ],
-      ownervideo:[
-         {
-             type:Schema.Types.ObjectId,
-             ref:"Video"
-         }
-     ],
-      ownertweet:[
-         {
-             type:Schema.Types.ObjectId,
-             ref:"Tweet"
-         }
-     ],
-      ownercomment:[
-         {
-             type:Schema.Types.ObjectId,
-             ref:"Comment"
-         }
-     ],
-    
+import mongoose, { Schema } from "mongoose";
 
-     
- 
- },
- {timestamps:true}
- )
- 
- 
- export let Like=mongoose.model("Like",likeschema)
+let likeschema = new Schema({
+    video: {
+        type: Schema.Types.ObjectId,
+        ref: "Video"
+    },
+    comment: {
+        type: Schema.Types.ObjectId,
+        ref: "Comment"
+    },
+    tweet: {
+        type: Schema.Types.ObjectId,
+        ref: "Tweet"
+    },
+    likedBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    }
+},
+{ timestamps: true }
+)
 
+export let Like = mongoose.model("Like", likeschema)

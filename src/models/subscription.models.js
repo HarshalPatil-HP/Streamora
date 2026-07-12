@@ -1,37 +1,17 @@
 
- import mongoose, { Schema } from "mongoose";
- 
- let subscriptionschema=new Schema({
+import mongoose, { Schema } from "mongoose";
 
-        owneruser:[
-         {
-             type:Schema.Types.ObjectId,
-             ref:"User"
-         }
-     ],
-    
-        suscriber:[
-         {
-             type:Schema.Types.ObjectId,
-             ref:"User"
-         }
-     ],
-   
-        channel:[
-         {
-             type:Schema.Types.ObjectId,
-             ref:"User"
-         }
-     ],
-   
-     
- 
- },
- {timestamps:true}
- )
- 
- 
+let subscriptionschema = new Schema({
+    subscriber: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    },
+    channel: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    }
+},
+{ timestamps: true }
+)
 
- 
- export let Subscription=mongoose.model("Subscription",subscriptionschema)
-
+export let Subscription = mongoose.model("Subscription", subscriptionschema)

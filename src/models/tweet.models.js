@@ -8,17 +8,11 @@
          required:true,
  
      },
-   owner: {
-    type: Schema.Types.ObjectId,
-    ref: "User"
-}
-     
-    
-    
- 
-     
- 
- },
+    owner: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    }
+},
  {timestamps:true}
  )
  

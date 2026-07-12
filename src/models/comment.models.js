@@ -1,32 +1,24 @@
 
- import mongoose, { Schema } from "mongoose";
- import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
- let commentschema=new Schema({
-    
-     contend:{
-         type:String,
-         required:true,
- 
-     },
-   
+import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+
+let commentschema = new Schema({
+    contend: {
+        type: String,
+        required: true
+    },
+    video: {
+        type: Schema.Types.ObjectId,
+        ref: "Video"
+    },
     owner: {
-    type: Schema.Types.ObjectId,
-    ref: "User"
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    }
 },
-      ownervideos:[
-         {
-             type:Schema.Types.ObjectId,
-             ref:"Video"
-         }
-     ],
-    
+{ timestamps: true }
+)
 
- 
- },
- {timestamps:true}
- )
- 
- commentschema.plugin(mongooseAggregatePaginate)
- 
- export let Comment=mongoose.model("Comment",commentschema)
+commentschema.plugin(mongooseAggregatePaginate)
 
+export let Comment = mongoose.model("Comment", commentschema)
