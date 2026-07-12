@@ -20,7 +20,7 @@ const genAccessandrefreshtoken = async (userid) => {
         await user.save({ validateBeforeSave: false })
         return { accesstoken, refreshtoken }
     } catch (error) {
-        throw new apireject(400, "vo genarate vale function may gadbad hua hay")
+        throw new apireject(500, "Failed to generate authentication tokens")
     }
 }
 
@@ -87,13 +87,13 @@ const loginUser = asynchandler(async (req, res) => {
     });
 
     if (!user) {
-        throw new apireject(400, "invalid user try signin little boy")
+        throw new apireject(400, "Invalid credentials")
     }
 
     const ispass = await user.isPasswordCorrect(password)
     
     if (!ispass) {
-        throw new apireject(400, "password not match kid")
+        throw new apireject(400, "Invalid credentials")
     }
 
     const { accesstoken, refreshtoken } = await genAccessandrefreshtoken(user._id)
@@ -101,7 +101,7 @@ const loginUser = asynchandler(async (req, res) => {
     const loggedin = await User.findById(user._id).select("-password -refreshtoken")
 
     if (!loggedin) {
-        throw new apireject(400, "notlgged in")
+        throw new apireject(400, "Login failed, please try again")
     }
 
     const option = {
@@ -158,7 +158,7 @@ const RefreshAccesstoken = asynchandler(async (req, res) => {
                 )
             )
     } catch (error) {
-        throw new apireject(401, "somethingwent erong while genarting refresh token")
+        throw new apireject(401, "Invalid or expired refresh token")
     }
 })
 

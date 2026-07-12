@@ -5,10 +5,11 @@ export function createLayout(currentPath = "/") {
   const wrapper = document.createElement("div");
   wrapper.className = "app-shell flex min-h-screen";
 
+  // Dark overlay for mobile sidebar
   const overlay = document.createElement("div");
   overlay.id = "sidebar-overlay";
   overlay.className =
-    "fixed inset-0 z-30 hidden bg-slate-900/20 backdrop-blur-sm lg:hidden";
+    "fixed inset-0 z-30 hidden bg-black/60 backdrop-blur-sm lg:hidden";
   overlay.addEventListener("click", () => {
     document.getElementById("sidebar")?.classList.add("-translate-x-full");
     overlay.classList.add("hidden");
