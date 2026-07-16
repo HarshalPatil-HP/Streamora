@@ -26,6 +26,7 @@ async function render() {
     const { html, layout, mount, params: pageParams } = result;
 
     if (layout) {
+      
       if (!layoutInstance) {
         app.innerHTML = "";
         layoutInstance = createLayout(pathname);
