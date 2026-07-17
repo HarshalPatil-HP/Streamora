@@ -32,7 +32,7 @@ export function createSidebar(currentPath = "/") {
     : `<span class="text-xs font-bold">${getInitials(user?.fullname || "U")}</span>`;
 
   sidebar.innerHTML = `
-    <!-- Logo -->
+    
     <div class="flex h-16 items-center gap-3 border-b border-[#1E1E1E] px-5">
       <a href="#/" class="flex items-center gap-3 select-none">
         <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[#0A0A0A]">
@@ -139,6 +139,6 @@ export function updateSidebarActiveState(currentPath) {
       path === currentPath ||
       (path.startsWith("/channel") && currentPath.startsWith("/channel"));
     link.classList.toggle("nav-link-active", isActive);
-    link.classList.toggle("nav-link", !isActive || true); // always keep base class
+    link.classList.toggle("nav-link", !isActive || true); 
   });
 }
