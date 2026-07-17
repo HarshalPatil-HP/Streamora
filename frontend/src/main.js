@@ -79,5 +79,6 @@ async function bootstrap() {
     await render();
   }
 }
+console.log("optimizing somne stuff");
 window.addEventListener("hashchange", render);
 window.addEventListener("load", bootstrap);
