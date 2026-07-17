@@ -5,7 +5,6 @@ import { parseHash, getRouteRenderer } from "./router.js";
 
 const app = document.getElementById("app");
 const renderRoute = getRouteRenderer();
-
 let layoutInstance = null;
 let isRendering = false;
 
@@ -70,7 +69,6 @@ async function render() {
     isRendering = false;
   }
 }
-
 async function bootstrap() {
   await initAuth();
   subscribe(() => refreshHeader());
@@ -81,6 +79,5 @@ async function bootstrap() {
     await render();
   }
 }
-
 window.addEventListener("hashchange", render);
 window.addEventListener("load", bootstrap);
