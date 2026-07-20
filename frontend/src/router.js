@@ -64,14 +64,17 @@ export function parseHash() {
 
 export function navigate(path) {
   window.location.hash = path.startsWith("#") ? path : `#${path}`;
+  
 }
 
 export function getRedirectPath() {
   const { params } = parseHash();
   return params.redirect || null;
+  console.log("router file running");
 }
 
 export function getRouteRenderer() {
+  console.log("router file running");
   return async (pathname, params) => {
     const matched = matchRoute(pathname);
 
