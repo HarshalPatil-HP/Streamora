@@ -8,6 +8,7 @@ const renderRoute = getRouteRenderer();
 let layoutInstance = null;
 let isRendering = false;
 
+console.log("optimizing somne stuff");
 async function render() {
   if (isRendering) return;
   isRendering = true;
@@ -79,6 +80,5 @@ async function bootstrap() {
     await render();
   }
 }
-console.log("optimizing somne stuff");
 window.addEventListener("hashchange", render);
 window.addEventListener("load", bootstrap);
