@@ -7,6 +7,7 @@ import { LoginPage, mountLoginPage } from "./pages/LoginPage.js";
 import { SignupPage, mountSignupPage } from "./pages/SignupPage.js";
 import { getAuthState } from "./context/authContext.js";
 
+console.log("router file running");
 const routes = [
   { path: "/", component: HomePage, mount: mountHomePage, layout: true, public: true },
   { path: "/tweets", component: TweetFeedPage, mount: mountTweetFeedPage, layout: true, public: true },
