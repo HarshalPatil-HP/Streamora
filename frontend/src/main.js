@@ -8,7 +8,6 @@ const renderRoute = getRouteRenderer();
 let layoutInstance = null;
 let isRendering = false;
 
-console.log("optimizing somne stuff");
 async function render() {
   if (isRendering) return;
   isRendering = true;
