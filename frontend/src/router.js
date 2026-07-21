@@ -7,7 +7,6 @@ import { LoginPage, mountLoginPage } from "./pages/LoginPage.js";
 import { SignupPage, mountSignupPage } from "./pages/SignupPage.js";
 import { getAuthState } from "./context/authContext.js";
 
-console.log("router file running");
 const routes = [
   { path: "/", component: HomePage, mount: mountHomePage, layout: true, public: true },
   { path: "/tweets", component: TweetFeedPage, mount: mountTweetFeedPage, layout: true, public: true },
@@ -70,7 +69,6 @@ export function navigate(path) {
 export function getRedirectPath() {
   const { params } = parseHash();
   return params.redirect || null;
-  console.log("router file running");
 }
 
 export function getRouteRenderer() {
