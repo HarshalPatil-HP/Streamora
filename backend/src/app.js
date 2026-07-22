@@ -9,6 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 let app = express();
 
+
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true
