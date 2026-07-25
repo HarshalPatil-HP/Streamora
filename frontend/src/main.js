@@ -14,7 +14,6 @@ async function render() {
   try {
     const { pathname, params, notFound } = parseHash();
     const result = await renderRoute(pathname, params);
-
     if (result.blocked) {
       isRendering = false;
       await render();
