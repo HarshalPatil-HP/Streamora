@@ -30,7 +30,6 @@ async function render() {
         updateLayoutActiveState(pathname);
         refreshHeader();
       }
-
       if (notFound) {
         layoutInstance.main.innerHTML = `
           <div class="surface-card flex min-h-[60vh] flex-col items-center justify-center text-center">
