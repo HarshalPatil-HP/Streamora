@@ -20,7 +20,6 @@ async function render() {
       return;
     }
     const { html, layout, mount, params: pageParams } = result;
-
     if (layout) {
       if (!layoutInstance) {
         app.innerHTML = "";
@@ -67,7 +66,6 @@ async function render() {
 async function bootstrap() {
   await initAuth();
   subscribe(() => refreshHeader());
-
   if (!window.location.hash) {
     window.location.hash = "#/";
   } else {
