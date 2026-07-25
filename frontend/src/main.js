@@ -11,7 +11,6 @@ let isRendering = false;
 async function render() {
   if (isRendering) return;
   isRendering = true;
-
   try {
     const { pathname, params, notFound } = parseHash();
     const result = await renderRoute(pathname, params);
