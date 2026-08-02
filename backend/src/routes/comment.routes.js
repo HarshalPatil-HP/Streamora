@@ -4,8 +4,8 @@ import {
     addComment,
     updateComment,
     deleteComment
-} from "../controllers/comment.controller.js"
-import { authmiddleware } from "../middlewares/auth.middleware.js"
+} from "../controllers/comment.controller.js";
+import { authmiddleware } from "../middlewares/auth.middleware.js";
 
 const router = Router()
 
