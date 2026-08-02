@@ -7,7 +7,7 @@ import {
 } from "../controllers/comment.controller.js";
 import { authmiddleware } from "../middlewares/auth.middleware.js";
 
-const router = Router()
+const router = Router();
 
 router.route("/:videoId").get(getVideoComments)
 router.route("/:videoId").post(authmiddleware, addComment)
