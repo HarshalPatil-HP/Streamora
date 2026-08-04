@@ -18,7 +18,7 @@ import{app}from "./app.js"
 import connectionInstance from "./db/index.js"
 
 let port=process.env.PORT||8001
-
+/* it will listen if mongo is connevted , fixed by harshal*/
 connectionInstance()
 .then(()=>{
     app.listen(port,()=>{

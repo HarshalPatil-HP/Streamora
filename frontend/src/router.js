@@ -65,6 +65,7 @@ export function parseHash() {
 
 export function navigate(path) {
   window.location.hash = path.startsWith("#") ? path : `#${path}`;
+  
 }
 
 export function getRedirectPath() {
@@ -73,6 +74,7 @@ export function getRedirectPath() {
 }
 
 export function getRouteRenderer() {
+  console.log("router file running");
   return async (pathname, params) => {
     const matched = matchRoute(pathname);
 

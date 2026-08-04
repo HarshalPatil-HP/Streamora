@@ -84,7 +84,7 @@ export async function mountHomePage() {
       });
       return;
     }
-
+    
     container.innerHTML = `<div class="video-grid">${renderVideoGrid(videos)}</div>`;
   } catch (err) {
     container.innerHTML = renderEmptyState({
@@ -95,3 +95,5 @@ export async function mountHomePage() {
     document.getElementById("retry-home")?.addEventListener("click", () => mountHomePage());
   }
 }
+console.log("all set");
+

@@ -1,6 +1,10 @@
 import "./css/input.css";
 import { initAuth, subscribe } from "./context/authContext.js";
-import { createLayout, updateLayoutActiveState, refreshHeader } from "./components/Layout.js";
+import {
+  createLayout,
+  updateLayoutActiveState,
+  refreshHeader,
+} from "./components/Layout.js";
 import { parseHash, getRouteRenderer } from "./router.js";
 
 const app = document.getElementById("app");
@@ -72,7 +76,7 @@ async function render() {
 
 async function bootstrap() {
   const minSplashTime = new Promise((resolve) => setTimeout(resolve, 2500));
-  
+
   const initPromise = initAuth().then(() => {
     subscribe(() => refreshHeader());
   });
