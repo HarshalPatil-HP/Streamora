@@ -131,6 +131,7 @@ const loginUser = asynchandler(async (req, res) => {
   const option = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   };
 
   res
@@ -164,6 +165,7 @@ const RefreshAccesstoken = asynchandler(async (req, res) => {
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     };
     const { accesstoken, refreshtoken: newrefreshtoken } =
       await genAccessandrefreshtoken(user._id);
@@ -202,6 +204,7 @@ const logoutUser = asynchandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   };
   return res
     .status(200)
