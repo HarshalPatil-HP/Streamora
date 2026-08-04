@@ -73,19 +73,27 @@ export function mountLoginPage() {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       const btn = document.getElementById("login-btn");
-      
+
       if (btn && btn.disabled) return;
-      if (btn) { btn.disabled = true; btn.textContent = "Signing in..."; }
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Signing in...";
+      }
 
       try {
         await loginUser(email, password);
-        const redirect = new URLSearchParams(window.location.hash.split("?")[1]).get("redirect");
+        const redirect = new URLSearchParams(
+          window.location.hash.split("?")[1],
+        ).get("redirect");
         window.location.hash = redirect ? `#${redirect}` : "#/";
         showToast("Welcome back!", "success");
       } catch (err) {
         showToast(err.message, "error");
       } finally {
-        if (btn) { btn.disabled = false; btn.textContent = "Sign In"; }
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Sign In";
+        }
       }
     };
   }

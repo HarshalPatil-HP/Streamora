@@ -1,263 +1,338 @@
-import mongoose, { isValidObjectId } from "mongoose"
-import { Like } from "../models/like.models.js"
-import { Video } from "../models/video.models.js"
-import { Comment } from "../models/comment.models.js"
-import { Tweet } from "../models/tweet.models.js"
-import { apireject } from "../utils/Apireject.js"
-import { Apiresolve } from "../utils/Apiresolved.js"
-import { asynchandler } from "../utils/asynchandler.js"
+import mongoose, { isValidObjectId } from "mongoose";
+import { Like } from "../models/like.models.js";
+import { Video } from "../models/video.models.js";
+import { Comment } from "../models/comment.models.js";
+import { Tweet } from "../models/tweet.models.js";
+import { apireject } from "../utils/Apireject.js";
+import { Apiresolve } from "../utils/Apiresolved.js";
+import { asynchandler } from "../utils/asynchandler.js";
 
 const toggleVideoLike = asynchandler(async (req, res) => {
-    const { videoId } = req.params
+  const { videoId } = req.params;
 
-    if (!isValidObjectId(videoId)) {
-        throw new apireject(400, "Invalid video id")
-    }
+  if (!isValidObjectId(videoId)) {
+    throw new apireject(400, "Invalid video id");
+  }
 
-    const video = await Video.findById(videoId)
-    if (!video) {
-        throw new apireject(404, "Video not found")
-    }
+  const video = await Video.findById(videoId);
+  if (!video) {
+    throw new apireject(404, "Video not found");
+  }
 
-    const existingLike = await Like.findOne({
-        video: videoId,
-        likedBy: req.user._id
-    })
+  const existingLike = await Like.findOne({
+    video: videoId,
+    likedBy: req.user._id,
+  });
 
-    if (existingLike) {
-        await Like.findByIdAndDelete(existingLike._id)
-        const likeCount = await Like.countDocuments({ video: videoId })
-        return res
-            .status(200)
-            .json(new Apiresolve(200, { liked: false, likeCount }, "Video unliked successfully"))
-    }
-
-    try {
-        await Like.create({
-            video: videoId,
-            likedBy: req.user._id
-        })
-    } catch (err) {
-        // Handle race-condition duplicate key (unique index violation)
-        if (err.code === 11000) {
-            const likeCount = await Like.countDocuments({ video: videoId })
-            return res.status(200).json(new Apiresolve(200, { liked: true, likeCount }, "Video already liked"))
-        }
-        throw err
-    }
-
-    const likeCount = await Like.countDocuments({ video: videoId })
+  if (existingLike) {
+    await Like.findByIdAndDelete(existingLike._id);
+    const likeCount = await Like.countDocuments({ video: videoId });
     return res
+      .status(200)
+      .json(
+        new Apiresolve(
+          200,
+          { liked: false, likeCount },
+          "Video unliked successfully",
+        ),
+      );
+  }
+
+  try {
+    await Like.create({
+      video: videoId,
+      likedBy: req.user._id,
+    });
+  } catch (err) {
+    // Handle race-condition duplicate key (unique index violation)
+    if (err.code === 11000) {
+      const likeCount = await Like.countDocuments({ video: videoId });
+      return res
         .status(200)
-        .json(new Apiresolve(200, { liked: true, likeCount }, "Video liked successfully"))
-})
+        .json(
+          new Apiresolve(
+            200,
+            { liked: true, likeCount },
+            "Video already liked",
+          ),
+        );
+    }
+    throw err;
+  }
+
+  const likeCount = await Like.countDocuments({ video: videoId });
+  return res
+    .status(200)
+    .json(
+      new Apiresolve(
+        200,
+        { liked: true, likeCount },
+        "Video liked successfully",
+      ),
+    );
+});
 
 const getVideoLikeStatus = asynchandler(async (req, res) => {
-    const { videoId } = req.params
+  const { videoId } = req.params;
 
-    if (!isValidObjectId(videoId)) {
-        throw new apireject(400, "Invalid video id")
-    }
+  if (!isValidObjectId(videoId)) {
+    throw new apireject(400, "Invalid video id");
+  }
 
-    const likeCount = await Like.countDocuments({ video: videoId })
-    let liked = false
+  const likeCount = await Like.countDocuments({ video: videoId });
+  let liked = false;
 
-    if (req.user?._id) {
-        const existingLike = await Like.findOne({ video: videoId, likedBy: req.user._id })
-        liked = Boolean(existingLike)
-    }
+  if (req.user?._id) {
+    const existingLike = await Like.findOne({
+      video: videoId,
+      likedBy: req.user._id,
+    });
+    liked = Boolean(existingLike);
+  }
 
-    return res
-        .status(200)
-        .json(new Apiresolve(200, { liked, likeCount }, "Like status fetched"))
-})
+  return res
+    .status(200)
+    .json(new Apiresolve(200, { liked, likeCount }, "Like status fetched"));
+});
 
 const toggleCommentLike = asynchandler(async (req, res) => {
-    const { commentId } = req.params
+  const { commentId } = req.params;
 
-    if (!isValidObjectId(commentId)) {
-        throw new apireject(400, "Invalid comment id")
-    }
+  if (!isValidObjectId(commentId)) {
+    throw new apireject(400, "Invalid comment id");
+  }
 
-    const comment = await Comment.findById(commentId)
-    if (!comment) {
-        throw new apireject(404, "Comment not found")
-    }
+  const comment = await Comment.findById(commentId);
+  if (!comment) {
+    throw new apireject(404, "Comment not found");
+  }
 
-    const existingLike = await Like.findOne({
-        comment: commentId,
-        likedBy: req.user._id
-    })
+  const existingLike = await Like.findOne({
+    comment: commentId,
+    likedBy: req.user._id,
+  });
 
-    if (existingLike) {
-        await Like.findByIdAndDelete(existingLike._id)
-        const likeCount = await Like.countDocuments({ comment: commentId })
-        return res
-            .status(200)
-            .json(new Apiresolve(200, { liked: false, likeCount }, "Comment unliked successfully"))
-    }
-
-    try {
-        await Like.create({
-            comment: commentId,
-            likedBy: req.user._id
-        })
-    } catch (err) {
-        if (err.code === 11000) {
-            const likeCount = await Like.countDocuments({ comment: commentId })
-            return res.status(200).json(new Apiresolve(200, { liked: true, likeCount }, "Comment already liked"))
-        }
-        throw err
-    }
-
-    const likeCount = await Like.countDocuments({ comment: commentId })
+  if (existingLike) {
+    await Like.findByIdAndDelete(existingLike._id);
+    const likeCount = await Like.countDocuments({ comment: commentId });
     return res
+      .status(200)
+      .json(
+        new Apiresolve(
+          200,
+          { liked: false, likeCount },
+          "Comment unliked successfully",
+        ),
+      );
+  }
+
+  try {
+    await Like.create({
+      comment: commentId,
+      likedBy: req.user._id,
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      const likeCount = await Like.countDocuments({ comment: commentId });
+      return res
         .status(200)
-        .json(new Apiresolve(200, { liked: true, likeCount }, "Comment liked successfully"))
-})
+        .json(
+          new Apiresolve(
+            200,
+            { liked: true, likeCount },
+            "Comment already liked",
+          ),
+        );
+    }
+    throw err;
+  }
+
+  const likeCount = await Like.countDocuments({ comment: commentId });
+  return res
+    .status(200)
+    .json(
+      new Apiresolve(
+        200,
+        { liked: true, likeCount },
+        "Comment liked successfully",
+      ),
+    );
+});
 
 const getCommentLikeStatus = asynchandler(async (req, res) => {
-    const { commentId } = req.params
+  const { commentId } = req.params;
 
-    if (!isValidObjectId(commentId)) {
-        throw new apireject(400, "Invalid comment id")
-    }
+  if (!isValidObjectId(commentId)) {
+    throw new apireject(400, "Invalid comment id");
+  }
 
-    const likeCount = await Like.countDocuments({ comment: commentId })
-    let liked = false
+  const likeCount = await Like.countDocuments({ comment: commentId });
+  let liked = false;
 
-    if (req.user?._id) {
-        const existingLike = await Like.findOne({ comment: commentId, likedBy: req.user._id })
-        liked = Boolean(existingLike)
-    }
+  if (req.user?._id) {
+    const existingLike = await Like.findOne({
+      comment: commentId,
+      likedBy: req.user._id,
+    });
+    liked = Boolean(existingLike);
+  }
 
-    return res
-        .status(200)
-        .json(new Apiresolve(200, { liked, likeCount }, "Comment like status fetched"))
-})
+  return res
+    .status(200)
+    .json(
+      new Apiresolve(200, { liked, likeCount }, "Comment like status fetched"),
+    );
+});
 
 const toggleTweetLike = asynchandler(async (req, res) => {
-    const { tweetId } = req.params
+  const { tweetId } = req.params;
 
-    if (!isValidObjectId(tweetId)) {
-        throw new apireject(400, "Invalid tweet id")
-    }
+  if (!isValidObjectId(tweetId)) {
+    throw new apireject(400, "Invalid tweet id");
+  }
 
-    const tweet = await Tweet.findById(tweetId)
-    if (!tweet) {
-        throw new apireject(404, "Tweet not found")
-    }
+  const tweet = await Tweet.findById(tweetId);
+  if (!tweet) {
+    throw new apireject(404, "Tweet not found");
+  }
 
-    const existingLike = await Like.findOne({
-        tweet: tweetId,
-        likedBy: req.user._id
-    })
+  const existingLike = await Like.findOne({
+    tweet: tweetId,
+    likedBy: req.user._id,
+  });
 
-    if (existingLike) {
-        await Like.findByIdAndDelete(existingLike._id)
-        const likeCount = await Like.countDocuments({ tweet: tweetId })
-        return res
-            .status(200)
-            .json(new Apiresolve(200, { liked: false, likeCount }, "Tweet unliked successfully"))
-    }
-
-    try {
-        await Like.create({
-            tweet: tweetId,
-            likedBy: req.user._id
-        })
-    } catch (err) {
-        if (err.code === 11000) {
-            const likeCount = await Like.countDocuments({ tweet: tweetId })
-            return res.status(200).json(new Apiresolve(200, { liked: true, likeCount }, "Tweet already liked"))
-        }
-        throw err
-    }
-
-    const likeCount = await Like.countDocuments({ tweet: tweetId })
+  if (existingLike) {
+    await Like.findByIdAndDelete(existingLike._id);
+    const likeCount = await Like.countDocuments({ tweet: tweetId });
     return res
+      .status(200)
+      .json(
+        new Apiresolve(
+          200,
+          { liked: false, likeCount },
+          "Tweet unliked successfully",
+        ),
+      );
+  }
+
+  try {
+    await Like.create({
+      tweet: tweetId,
+      likedBy: req.user._id,
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      const likeCount = await Like.countDocuments({ tweet: tweetId });
+      return res
         .status(200)
-        .json(new Apiresolve(200, { liked: true, likeCount }, "Tweet liked successfully"))
-})
+        .json(
+          new Apiresolve(
+            200,
+            { liked: true, likeCount },
+            "Tweet already liked",
+          ),
+        );
+    }
+    throw err;
+  }
+
+  const likeCount = await Like.countDocuments({ tweet: tweetId });
+  return res
+    .status(200)
+    .json(
+      new Apiresolve(
+        200,
+        { liked: true, likeCount },
+        "Tweet liked successfully",
+      ),
+    );
+});
 
 const getTweetLikeStatus = asynchandler(async (req, res) => {
-    const { tweetId } = req.params
+  const { tweetId } = req.params;
 
-    if (!isValidObjectId(tweetId)) {
-        throw new apireject(400, "Invalid tweet id")
-    }
+  if (!isValidObjectId(tweetId)) {
+    throw new apireject(400, "Invalid tweet id");
+  }
 
-    const likeCount = await Like.countDocuments({ tweet: tweetId })
-    let liked = false
+  const likeCount = await Like.countDocuments({ tweet: tweetId });
+  let liked = false;
 
-    if (req.user?._id) {
-        const existingLike = await Like.findOne({ tweet: tweetId, likedBy: req.user._id })
-        liked = Boolean(existingLike)
-    }
+  if (req.user?._id) {
+    const existingLike = await Like.findOne({
+      tweet: tweetId,
+      likedBy: req.user._id,
+    });
+    liked = Boolean(existingLike);
+  }
 
-    return res
-        .status(200)
-        .json(new Apiresolve(200, { liked, likeCount }, "Tweet like status fetched"))
-})
+  return res
+    .status(200)
+    .json(
+      new Apiresolve(200, { liked, likeCount }, "Tweet like status fetched"),
+    );
+});
 
 const getLikedVideos = asynchandler(async (req, res) => {
-    const likedVideos = await Like.aggregate([
-        {
-            $match: {
-                likedBy: new mongoose.Types.ObjectId(req.user._id),
-                video: { $exists: true, $ne: null }
-            }
-        },
-        {
+  const likedVideos = await Like.aggregate([
+    {
+      $match: {
+        likedBy: new mongoose.Types.ObjectId(req.user._id),
+        video: { $exists: true, $ne: null },
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "video",
+        foreignField: "_id",
+        as: "likedVideo",
+        pipeline: [
+          {
             $lookup: {
-                from: "videos",
-                localField: "video",
-                foreignField: "_id",
-                as: "likedVideo",
-                pipeline: [
-                    {
-                        $lookup: {
-                            from: "users",
-                            localField: "owner",
-                            foreignField: "_id",
-                            as: "ownerDetails",
-                            pipeline: [
-                                {
-                                    $project: {
-                                        fullname: 1,
-                                        uname: 1,
-                                        avatar: 1
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        $addFields: {
-                            ownerDetails: { $first: "$ownerDetails" }
-                        }
-                    }
-                ]
-            }
-        },
-        {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "ownerDetails",
+              pipeline: [
+                {
+                  $project: {
+                    fullname: 1,
+                    uname: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
             $addFields: {
-                likedVideo: { $first: "$likedVideo" }
-            }
-        }
-    ])
+              ownerDetails: { $first: "$ownerDetails" },
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        likedVideo: { $first: "$likedVideo" },
+      },
+    },
+  ]);
 
-    return res
-        .status(200)
-        .json(new Apiresolve(200, likedVideos, "Liked videos fetched successfully"))
-})
+  return res
+    .status(200)
+    .json(
+      new Apiresolve(200, likedVideos, "Liked videos fetched successfully"),
+    );
+});
 
 export {
-    toggleCommentLike,
-    toggleTweetLike,
-    toggleVideoLike,
-    getLikedVideos,
-    getVideoLikeStatus,
-    getCommentLikeStatus,
-    getTweetLikeStatus
-}
+  toggleCommentLike,
+  toggleTweetLike,
+  toggleVideoLike,
+  getLikedVideos,
+  getVideoLikeStatus,
+  getCommentLikeStatus,
+  getTweetLikeStatus,
+};

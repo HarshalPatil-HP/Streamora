@@ -1,7 +1,9 @@
 import api from "./api.js";
 
 export async function getVideoComments(videoId, page = 1) {
-  const { data } = await api.get(`/comments/${videoId}`, { params: { page, limit: 20 } });
+  const { data } = await api.get(`/comments/${videoId}`, {
+    params: { page, limit: 20 },
+  });
   return data.data;
 }
 

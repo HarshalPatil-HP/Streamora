@@ -4,10 +4,19 @@ import { getUserTweets } from "../services/tweetService.js";
 import { getUserPlaylists } from "../services/playlistService.js";
 import { toggleSubscribe } from "../services/subscriptionService.js";
 import api from "../services/api.js";
-import { getAuthState, setAuthUser, requireAuth } from "../context/authContext.js";
+import {
+  getAuthState,
+  setAuthUser,
+  requireAuth,
+} from "../context/authContext.js";
 import { renderVideoGrid } from "../components/VideoCard.js";
 import { renderSpinner, renderEmptyState, showToast } from "../utils/ui.js";
-import { escapeHtml, formatViews, formatDate, getInitials } from "../utils/format.js";
+import {
+  escapeHtml,
+  formatViews,
+  formatDate,
+  getInitials,
+} from "../utils/format.js";
 
 export function ChannelPage({ username }) {
   return `<div id="channel-root">${renderSpinner("lg")}</div>`;
@@ -15,7 +24,7 @@ export function ChannelPage({ username }) {
 
 export async function mountChannelPage(params) {
   const username = params?.username;
-  const root     = document.getElementById("channel-root");
+  const root = document.getElementById("channel-root");
   if (!root) return;
 
   try {
@@ -39,7 +48,9 @@ export async function mountChannelPage(params) {
           <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
           
           <!-- Edit Cover Overlay (Owner Only) -->
-          ${isOwnChannel ? `
+          ${
+            isOwnChannel
+              ? `
           <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/cover:opacity-100 transition-opacity duration-200">
             <div class="flex gap-2">
               <label class="btn-primary cursor-pointer text-xs gap-1.5 shadow-xl">
@@ -47,10 +58,12 @@ export async function mountChannelPage(params) {
                 Change Banner
                 <input type="file" id="channel-cover-input" accept="image/*" class="sr-only" />
               </label>
-              ${channel.cover ? `<button id="channel-cover-remove" class="btn-secondary text-xs gap-1.5 shadow-xl text-red-500 hover:text-red-600 border-none bg-white/90 hover:bg-white"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>` : ''}
+              ${channel.cover ? `<button id="channel-cover-remove" class="btn-secondary text-xs gap-1.5 shadow-xl text-red-500 hover:text-red-600 border-none bg-white/90 hover:bg-white"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>` : ""}
             </div>
           </div>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
 
         <!-- Profile area -->
@@ -59,12 +72,16 @@ export async function mountChannelPage(params) {
             <div class="flex items-end gap-4">
               <!-- Avatar -->
               <div class="group/avatar relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-[#0A0A0A] text-2xl font-bold text-white shadow-sm sm:h-32 sm:w-32">
-                ${channel.avatar
-                  ? `<img src="${escapeHtml(channel.avatar)}" class="h-full w-full object-cover" alt="" />`
-                  : getInitials(channel.fullname || channel.uname || username)}
+                ${
+                  channel.avatar
+                    ? `<img src="${escapeHtml(channel.avatar)}" class="h-full w-full object-cover" alt="" />`
+                    : getInitials(channel.fullname || channel.uname || username)
+                }
                 
                 <!-- Edit Avatar Overlay (Owner Only) -->
-                ${isOwnChannel ? `
+                ${
+                  isOwnChannel
+                    ? `
                 <div class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-200">
                   <div class="flex flex-col gap-1 items-center">
                     <label class="cursor-pointer p-1.5 rounded-full bg-white/20 hover:bg-white/40 transition-colors text-white">
@@ -73,11 +90,13 @@ export async function mountChannelPage(params) {
                       <input type="file" id="channel-avatar-input" accept="image/*" class="hidden" />
                     </label>
                     <div class="absolute -right-2 top-0">
-                      ${channel.avatar ? `<button id="channel-avatar-remove" class="p-1.5 rounded-full bg-red-500/80 hover:bg-red-500 transition-colors text-white"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>` : ''}
+                      ${channel.avatar ? `<button id="channel-avatar-remove" class="p-1.5 rounded-full bg-red-500/80 hover:bg-red-500 transition-colors text-white"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>` : ""}
                     </div>
                   </div>
                 </div>
-                ` : ''}
+                `
+                    : ""
+                }
               </div>
               <div class="pb-1">
                 <h1 class="text-2xl font-bold text-[#0A0A0A] truncate max-w-xs sm:max-w-md [text-shadow:0_1px_3px_rgba(255,255,255,0.8),0_2px_12px_rgba(255,255,255,1)]">${escapeHtml(channel.fullname || channel.uname || username)}</h1>
@@ -91,11 +110,12 @@ export async function mountChannelPage(params) {
               </div>
             </div>
             <!-- Action button -->
-            ${!isOwnChannel
-              ? `<button id="channel-sub-btn" class="${channel.issubscribed ? "btn-secondary" : "btn-primary"} mb-1">
+            ${
+              !isOwnChannel
+                ? `<button id="channel-sub-btn" class="${channel.issubscribed ? "btn-secondary" : "btn-primary"} mb-1">
                    ${channel.issubscribed ? "Subscribed" : "Subscribe"}
                  </button>`
-              : `<div class="mb-1">
+                : `<div class="mb-1">
                    <a href="#/dashboard" class="btn-secondary gap-2">
                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
                      Manage Channel
@@ -134,24 +154,36 @@ export async function mountChannelPage(params) {
           const videos = result?.docs || [];
           content.innerHTML = videos.length
             ? `<div class="video-grid">${renderVideoGrid(videos, { [String(channel._id)]: channel })}</div>`
-            : renderEmptyState({ title: "No videos yet", description: "This creator hasn't uploaded any videos yet." });
-
+            : renderEmptyState({
+                title: "No videos yet",
+                description: "This creator hasn't uploaded any videos yet.",
+              });
         } else if (tab === "tweets") {
           const tweets = await getUserTweets(channel._id);
-          const list   = Array.isArray(tweets) ? tweets : (tweets?.docs || []);
+          const list = Array.isArray(tweets) ? tweets : tweets?.docs || [];
           content.innerHTML = list.length
             ? `<div class="max-w-2xl space-y-4">${list.map((t) => renderTweet(t, channel)).join("")}</div>`
-            : renderEmptyState({ title: "No posts yet", description: "No community posts from this creator yet." });
-
+            : renderEmptyState({
+                title: "No posts yet",
+                description: "No community posts from this creator yet.",
+              });
         } else {
           const playlists = await getUserPlaylists(channel._id);
-          const list = Array.isArray(playlists) ? playlists : (playlists?.docs || []);
+          const list = Array.isArray(playlists)
+            ? playlists
+            : playlists?.docs || [];
           content.innerHTML = list.length
             ? `<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">${list.map(renderPlaylist).join("")}</div>`
-            : renderEmptyState({ title: "No playlists", description: "No playlists created yet." });
+            : renderEmptyState({
+                title: "No playlists",
+                description: "No playlists created yet.",
+              });
         }
       } catch (err) {
-        content.innerHTML = renderEmptyState({ title: "Error loading content", description: err.message });
+        content.innerHTML = renderEmptyState({
+          title: "Error loading content",
+          description: err.message,
+        });
       }
     };
 
@@ -160,78 +192,101 @@ export async function mountChannelPage(params) {
     });
 
     // ── Subscribe ────────────────────────────────────────
-    document.getElementById("channel-sub-btn")?.addEventListener("click", async () => {
-      if (!requireAuth(`/channel/${username}`)) return;
-      const btn = document.getElementById("channel-sub-btn");
-      if (!btn) return;
-      btn.disabled    = true;
-      btn.textContent = "Updating…";
-      try {
-        const result = await toggleSubscribe(channel._id);
-        const subscribed = result?.subscribed;
-        btn.textContent = subscribed ? "Subscribed" : "Subscribe";
-        btn.className   = subscribed ? "btn-secondary" : "btn-primary";
-        btn.disabled    = false;
-        showToast(subscribed ? "Subscribed!" : "Unsubscribed", "success");
-      } catch (err) {
-        showToast(err.message, "error");
-        btn.disabled = false;
-      }
-    });
+    document
+      .getElementById("channel-sub-btn")
+      ?.addEventListener("click", async () => {
+        if (!requireAuth(`/channel/${username}`)) return;
+        const btn = document.getElementById("channel-sub-btn");
+        if (!btn) return;
+        btn.disabled = true;
+        btn.textContent = "Updating…";
+        try {
+          const result = await toggleSubscribe(channel._id);
+          const subscribed = result?.subscribed;
+          btn.textContent = subscribed ? "Subscribed" : "Subscribe";
+          btn.className = subscribed ? "btn-secondary" : "btn-primary";
+          btn.disabled = false;
+          showToast(subscribed ? "Subscribed!" : "Unsubscribed", "success");
+        } catch (err) {
+          showToast(err.message, "error");
+          btn.disabled = false;
+        }
+      });
 
     await loadTab("videos");
-    
+
     // ── Image Uploads (Owner Only) ───────────────────────
     if (isOwnChannel) {
-      document.getElementById("channel-avatar-input")?.addEventListener("change", async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        if (file.size > 10 * 1024 * 1024) { showToast("Image must be under 10MB", "error"); return; }
-        const fd = new FormData();
-        fd.append("avatar", file);
-        try {
-          const { data } = await api.patch("/user/profile/avatar", fd);
-          showToast("Profile picture updated!", "success");
-          setAuthUser(data.data);
-          mountChannelPage({ username });
-        } catch (err) { showToast(err.message, "error"); }
-      });
+      document
+        .getElementById("channel-avatar-input")
+        ?.addEventListener("change", async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          if (file.size > 10 * 1024 * 1024) {
+            showToast("Image must be under 10MB", "error");
+            return;
+          }
+          const fd = new FormData();
+          fd.append("avatar", file);
+          try {
+            const { data } = await api.patch("/user/profile/avatar", fd);
+            showToast("Profile picture updated!", "success");
+            setAuthUser(data.data);
+            mountChannelPage({ username });
+          } catch (err) {
+            showToast(err.message, "error");
+          }
+        });
 
-      document.getElementById("channel-avatar-remove")?.addEventListener("click", async () => {
-        if (!confirm("Remove your profile picture?")) return;
-        try {
-          const { data } = await api.delete("/user/profile/avatar");
-          showToast("Avatar removed", "success");
-          setAuthUser(data.data);
-          mountChannelPage({ username });
-        } catch (err) { showToast(err.message, "error"); }
-      });
+      document
+        .getElementById("channel-avatar-remove")
+        ?.addEventListener("click", async () => {
+          if (!confirm("Remove your profile picture?")) return;
+          try {
+            const { data } = await api.delete("/user/profile/avatar");
+            showToast("Avatar removed", "success");
+            setAuthUser(data.data);
+            mountChannelPage({ username });
+          } catch (err) {
+            showToast(err.message, "error");
+          }
+        });
 
-      document.getElementById("channel-cover-input")?.addEventListener("change", async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        if (file.size > 10 * 1024 * 1024) { showToast("Image must be under 10MB", "error"); return; }
-        const fd = new FormData();
-        fd.append("cover", file);
-        try {
-          const { data } = await api.patch("/user/profile/cover", fd);
-          showToast("Banner updated!", "success");
-          setAuthUser(data.data);
-          mountChannelPage({ username });
-        } catch (err) { showToast(err.message, "error"); }
-      });
+      document
+        .getElementById("channel-cover-input")
+        ?.addEventListener("change", async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          if (file.size > 10 * 1024 * 1024) {
+            showToast("Image must be under 10MB", "error");
+            return;
+          }
+          const fd = new FormData();
+          fd.append("cover", file);
+          try {
+            const { data } = await api.patch("/user/profile/cover", fd);
+            showToast("Banner updated!", "success");
+            setAuthUser(data.data);
+            mountChannelPage({ username });
+          } catch (err) {
+            showToast(err.message, "error");
+          }
+        });
 
-      document.getElementById("channel-cover-remove")?.addEventListener("click", async () => {
-        if (!confirm("Remove your channel banner?")) return;
-        try {
-          const { data } = await api.delete("/user/profile/cover");
-          showToast("Banner removed", "success");
-          setAuthUser(data.data);
-          mountChannelPage({ username });
-        } catch (err) { showToast(err.message, "error"); }
-      });
+      document
+        .getElementById("channel-cover-remove")
+        ?.addEventListener("click", async () => {
+          if (!confirm("Remove your channel banner?")) return;
+          try {
+            const { data } = await api.delete("/user/profile/cover");
+            showToast("Banner removed", "success");
+            setAuthUser(data.data);
+            mountChannelPage({ username });
+          } catch (err) {
+            showToast(err.message, "error");
+          }
+        });
     }
-
   } catch (err) {
     root.innerHTML = renderEmptyState({
       title: "Channel not found",
@@ -246,9 +301,11 @@ function renderTweet(tweet, channel) {
     <div class="surface-card">
       <div class="flex gap-3">
         <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#0A0A0A] text-xs font-bold text-white">
-          ${channel.avatar
-            ? `<img src="${escapeHtml(channel.avatar)}" class="h-full w-full rounded-full object-cover" />`
-            : getInitials(channel.fullname)}
+          ${
+            channel.avatar
+              ? `<img src="${escapeHtml(channel.avatar)}" class="h-full w-full rounded-full object-cover" />`
+              : getInitials(channel.fullname)
+          }
         </div>
         <div class="min-w-0 flex-1">
           <p class="text-sm">

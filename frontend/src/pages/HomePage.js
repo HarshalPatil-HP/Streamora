@@ -4,9 +4,11 @@ import { renderSkeletonGrid, renderEmptyState } from "../utils/ui.js";
 import { escapeHtml } from "../utils/format.js";
 
 export async function HomePage() {
-  const hashQuery = new URLSearchParams(window.location.hash.split("?")[1] || "");
+  const hashQuery = new URLSearchParams(
+    window.location.hash.split("?")[1] || "",
+  );
   const query = hashQuery.get("q") || "";
-  const sort  = hashQuery.get("sort") || "latest";
+  const sort = hashQuery.get("sort") || "latest";
 
   return `
     <div class="mb-8">
@@ -51,15 +53,19 @@ export async function mountHomePage() {
   const container = document.getElementById("home-grid");
   if (!container) return;
 
-  const hashQuery = new URLSearchParams(window.location.hash.split("?")[1] || "");
+  const hashQuery = new URLSearchParams(
+    window.location.hash.split("?")[1] || "",
+  );
   const query = hashQuery.get("q") || "";
-  const sort  = hashQuery.get("sort") || "latest";
+  const sort = hashQuery.get("sort") || "latest";
 
   // Wire up filter pills
   document.querySelectorAll(".sort-pill").forEach((btn) => {
     btn.addEventListener("click", () => {
       const newSort = btn.dataset.sort;
-      const base = query ? `/?q=${encodeURIComponent(query)}&sort=${newSort}` : `/?sort=${newSort}`;
+      const base = query
+        ? `/?q=${encodeURIComponent(query)}&sort=${newSort}`
+        : `/?sort=${newSort}`;
       window.location.hash = base;
     });
   });
@@ -84,7 +90,7 @@ export async function mountHomePage() {
       });
       return;
     }
-    
+
     container.innerHTML = `<div class="video-grid">${renderVideoGrid(videos)}</div>`;
   } catch (err) {
     container.innerHTML = renderEmptyState({
@@ -92,8 +98,9 @@ export async function mountHomePage() {
       description: err.message || "Please check your connection and try again.",
       actionHtml: `<button id="retry-home" class="btn-secondary">Retry</button>`,
     });
-    document.getElementById("retry-home")?.addEventListener("click", () => mountHomePage());
+    document
+      .getElementById("retry-home")
+      ?.addEventListener("click", () => mountHomePage());
   }
 }
 console.log("all set");
-

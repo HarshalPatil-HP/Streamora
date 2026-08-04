@@ -1,1 +1,1 @@
- export const db_name="vidtube"
+export const db_name = "vidtube";

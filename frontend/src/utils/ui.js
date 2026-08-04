@@ -6,25 +6,27 @@ export function showToast(message, type = "info") {
   if (!toastContainer) {
     toastContainer = document.createElement("div");
     toastContainer.id = "toast-container";
-    toastContainer.className = "fixed bottom-6 right-6 z-[100] flex flex-col gap-2 pointer-events-none";
+    toastContainer.className =
+      "fixed bottom-6 right-6 z-[100] flex flex-col gap-2 pointer-events-none";
     document.body.appendChild(toastContainer);
   }
 
   const styles = {
-    info:    "bg-[#0A0A0A] text-white border-[#222]",
+    info: "bg-[#0A0A0A] text-white border-[#222]",
     success: "bg-[#0A0A0A] text-white border-[#222]",
-    error:   "bg-red-600 text-white border-red-700",
+    error: "bg-red-600 text-white border-red-700",
   };
 
   const icons = {
-    info:    `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    info: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
     success: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
-    error:   `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    error: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
   };
 
   const toast = document.createElement("div");
   toast.className = `pointer-events-auto flex items-center gap-2.5 rounded-xl border px-4 py-3 text-sm font-medium shadow-card ${styles[type] || styles.info}`;
-  toast.style.cssText = "opacity:0; transform: translateY(6px); transition: opacity 0.25s ease, transform 0.25s ease;";
+  toast.style.cssText =
+    "opacity:0; transform: translateY(6px); transition: opacity 0.25s ease, transform 0.25s ease;";
   toast.innerHTML = `<span class="shrink-0 opacity-80">${icons[type] || icons.info}</span><span>${escapeHtml(message)}</span>`;
 
   toastContainer.appendChild(toast);
@@ -79,7 +81,7 @@ export function renderSkeletonGrid(count = 8) {
             <div class="skeleton h-3 w-1/2 rounded-lg"></div>
             <div class="skeleton h-3 w-1/3 rounded-lg"></div>
           </div>
-        </div>`
+        </div>`,
         )
         .join("")}
     </div>`;

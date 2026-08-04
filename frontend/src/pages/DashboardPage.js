@@ -1,10 +1,22 @@
-import { getDashboardStats, getDashboardVideos } from "../services/dashboardService.js";
-import { publishVideo, deleteVideo, togglePublish } from "../services/videoService.js";
+import {
+  getDashboardStats,
+  getDashboardVideos,
+} from "../services/dashboardService.js";
+import {
+  publishVideo,
+  deleteVideo,
+  togglePublish,
+} from "../services/videoService.js";
 import { getUserTweets, deleteTweet } from "../services/tweetService.js";
 import api from "../services/api.js";
 import { getAuthState, setAuthUser } from "../context/authContext.js";
 import { renderSpinner, renderEmptyState, showToast } from "../utils/ui.js";
-import { escapeHtml, formatViews, formatDate, getInitials } from "../utils/format.js";
+import {
+  escapeHtml,
+  formatViews,
+  formatDate,
+  getInitials,
+} from "../utils/format.js";
 
 export function DashboardPage() {
   const { user } = getAuthState();
@@ -80,7 +92,7 @@ export async function mountDashboardPage() {
   const root = document.getElementById("dashboard-root");
   if (!root) return;
   const { user } = getAuthState();
-  
+
   // Maintain active tab across re-renders
   window.dashboardTab = window.dashboardTab || "videos";
 
@@ -88,24 +100,26 @@ export async function mountDashboardPage() {
     const [stats, videosResult, tweetsResult] = await Promise.all([
       getDashboardStats(),
       getDashboardVideos(),
-      getUserTweets(user._id).catch(() => [])
+      getUserTweets(user._id).catch(() => []),
     ]);
     const videos = videosResult?.docs || [];
-    const tweets = Array.isArray(tweetsResult) ? tweetsResult : (tweetsResult?.docs || []);
+    const tweets = Array.isArray(tweetsResult)
+      ? tweetsResult
+      : tweetsResult?.docs || [];
 
     root.innerHTML = `
       <!-- Stat Cards -->
       <div class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        ${statCard("Total Views",    formatViews(stats.totalViews),       eyeIcon(),    "views")}
-        ${statCard("Subscribers",    formatViews(stats.totalSubscribers), usersIcon(),  "subs")}
-        ${statCard("Videos",         stats.totalVideos,                   videoIcon(),  "videos")}
-        ${statCard("Total Likes",    formatViews(stats.totalLikes),       heartIcon(),  "likes")}
+        ${statCard("Total Views", formatViews(stats.totalViews), eyeIcon(), "views")}
+        ${statCard("Subscribers", formatViews(stats.totalSubscribers), usersIcon(), "subs")}
+        ${statCard("Videos", stats.totalVideos, videoIcon(), "videos")}
+        ${statCard("Total Likes", formatViews(stats.totalLikes), heartIcon(), "likes")}
       </div>
 
       <!-- Tab Toggle -->
       <div class="mb-4 flex gap-2 border-b border-[#E8E8E8] pb-px">
-        <button data-dashboard-tab="videos" class="${window.dashboardTab === 'videos' ? 'border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-bold' : 'text-[#888] font-medium hover:text-[#0A0A0A]'} px-4 py-2 text-sm transition-colors">Videos</button>
-        <button data-dashboard-tab="tweets" class="${window.dashboardTab === 'tweets' ? 'border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-bold' : 'text-[#888] font-medium hover:text-[#0A0A0A]'} px-4 py-2 text-sm transition-colors">Community Posts</button>
+        <button data-dashboard-tab="videos" class="${window.dashboardTab === "videos" ? "border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-bold" : "text-[#888] font-medium hover:text-[#0A0A0A]"} px-4 py-2 text-sm transition-colors">Videos</button>
+        <button data-dashboard-tab="tweets" class="${window.dashboardTab === "tweets" ? "border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-bold" : "text-[#888] font-medium hover:text-[#0A0A0A]"} px-4 py-2 text-sm transition-colors">Community Posts</button>
       </div>
 
       <!-- Table Area -->
@@ -116,8 +130,8 @@ export async function mountDashboardPage() {
         </div>
         ${
           window.dashboardTab === "videos"
-          ? (videos.length
-            ? `
+            ? videos.length
+              ? `
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
               <thead class="border-b border-[#F3F3F3] bg-[#F9F9F9]">
@@ -158,19 +172,19 @@ export async function mountDashboardPage() {
                         </button>
                       </div>
                     </td>
-                  </tr>`
+                  </tr>`,
                   )
                   .join("")}
               </tbody>
             </table>
           </div>`
-            : renderEmptyState({
-                title: "No videos yet",
-                description: "Upload your first video to get started.",
-                actionHtml: `<button id="upload-empty-btn" class="btn-primary">Upload Video</button>`,
-              }))
-          : (tweets.length
-            ? `
+              : renderEmptyState({
+                  title: "No videos yet",
+                  description: "Upload your first video to get started.",
+                  actionHtml: `<button id="upload-empty-btn" class="btn-primary">Upload Video</button>`,
+                })
+            : tweets.length
+              ? `
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
               <thead class="border-b border-[#F3F3F3] bg-[#F9F9F9]">
@@ -196,23 +210,23 @@ export async function mountDashboardPage() {
                         Delete
                       </button>
                     </td>
-                  </tr>`
+                  </tr>`,
                   )
                   .join("")}
               </tbody>
             </table>
           </div>`
-            : renderEmptyState({
-                title: "No posts yet",
-                description: "You haven't posted any community updates.",
-                actionHtml: `<a href="#/tweets" class="btn-primary">Go to Community</a>`,
-              }))
+              : renderEmptyState({
+                  title: "No posts yet",
+                  description: "You haven't posted any community updates.",
+                  actionHtml: `<a href="#/tweets" class="btn-primary">Go to Community</a>`,
+                })
         }
       </div>
     `;
 
     // Bind tab clicks
-    root.querySelectorAll("[data-dashboard-tab]").forEach(btn => {
+    root.querySelectorAll("[data-dashboard-tab]").forEach((btn) => {
       btn.addEventListener("click", () => {
         window.dashboardTab = btn.dataset.dashboardTab;
         mountDashboardPage();
@@ -222,12 +236,17 @@ export async function mountDashboardPage() {
     root.querySelectorAll("[data-action]").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const action = btn.dataset.action;
-        
+
         if (action === "delete-tweet") {
           const row = btn.closest("[data-tweet-id]");
           const tweetId = row?.dataset.tweetId;
           if (!tweetId) return;
-          if (!confirm("Are you sure you want to delete this post? This cannot be undone.")) return;
+          if (
+            !confirm(
+              "Are you sure you want to delete this post? This cannot be undone.",
+            )
+          )
+            return;
           btn.textContent = "Deleting…";
           btn.disabled = true;
           try {
@@ -247,20 +266,25 @@ export async function mountDashboardPage() {
         if (!videoId) return;
 
         if (action === "delete") {
-          if (!confirm("Are you sure you want to delete this video? This cannot be undone.")) return;
+          if (
+            !confirm(
+              "Are you sure you want to delete this video? This cannot be undone.",
+            )
+          )
+            return;
           btn.textContent = "Deleting…";
-          btn.disabled    = true;
+          btn.disabled = true;
           try {
             await deleteVideo(videoId);
             showToast("Video deleted", "success");
             mountDashboardPage();
           } catch (err) {
             showToast(err.message, "error");
-            btn.disabled    = false;
+            btn.disabled = false;
             btn.textContent = "Delete";
           }
         } else if (action === "toggle") {
-          btn.disabled    = true;
+          btn.disabled = true;
           btn.textContent = "Updating…";
           try {
             await togglePublish(videoId);
@@ -275,8 +299,9 @@ export async function mountDashboardPage() {
     });
 
     bindUploadModal();
-    document.getElementById("upload-empty-btn")?.addEventListener("click", openUploadModal);
-
+    document
+      .getElementById("upload-empty-btn")
+      ?.addEventListener("click", openUploadModal);
   } catch (err) {
     root.innerHTML = renderEmptyState({
       title: "Dashboard error",
@@ -284,7 +309,6 @@ export async function mountDashboardPage() {
     });
   }
 }
-
 
 function statCard(label, value, iconSvg, id) {
   return `
@@ -301,10 +325,18 @@ function statCard(label, value, iconSvg, id) {
     </div>`;
 }
 
-function eyeIcon()   { return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`; }
-function usersIcon() { return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`; }
-function videoIcon() { return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect width="15" height="14" x="1" y="5" rx="2"/></svg>`; }
-function heartIcon() { return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`; }
+function eyeIcon() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+}
+function usersIcon() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+}
+function videoIcon() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect width="15" height="14" x="1" y="5" rx="2"/></svg>`;
+}
+function heartIcon() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
+}
 
 function openUploadModal() {
   const modal = document.getElementById("upload-modal");
@@ -314,9 +346,11 @@ function openUploadModal() {
 
 function bindUploadModal() {
   const modal = document.getElementById("upload-modal");
-  const form  = document.getElementById("upload-form");
+  const form = document.getElementById("upload-form");
 
-  document.getElementById("upload-btn")?.addEventListener("click", openUploadModal);
+  document
+    .getElementById("upload-btn")
+    ?.addEventListener("click", openUploadModal);
 
   document.getElementById("close-upload")?.addEventListener("click", () => {
     modal?.classList.add("hidden");
@@ -332,14 +366,18 @@ function bindUploadModal() {
   });
 
   // Show file names
-  document.getElementById("video-file-input")?.addEventListener("change", (e) => {
-    const el = document.getElementById("video-file-name");
-    if (el) el.textContent = e.target.files[0]?.name || "";
-  });
-  document.getElementById("thumbnail-input")?.addEventListener("change", (e) => {
-    const el = document.getElementById("thumbnail-name");
-    if (el) el.textContent = e.target.files[0]?.name || "";
-  });
+  document
+    .getElementById("video-file-input")
+    ?.addEventListener("change", (e) => {
+      const el = document.getElementById("video-file-name");
+      if (el) el.textContent = e.target.files[0]?.name || "";
+    });
+  document
+    .getElementById("thumbnail-input")
+    ?.addEventListener("change", (e) => {
+      const el = document.getElementById("thumbnail-name");
+      if (el) el.textContent = e.target.files[0]?.name || "";
+    });
 
   if (form) {
     form.onsubmit = async (e) => {
@@ -350,10 +388,10 @@ function bindUploadModal() {
 
       // Field-level client validation before hitting the API
       const fd = new FormData(form);
-      const title       = fd.get("title")?.toString().trim();
+      const title = fd.get("title")?.toString().trim();
       const description = fd.get("description")?.toString().trim();
-      const videoFile   = fd.get("videoFile");
-      const thumbnail   = fd.get("thumbnail");
+      const videoFile = fd.get("videoFile");
+      const thumbnail = fd.get("thumbnail");
 
       if (!title) {
         showToast("Title is required", "error");
@@ -385,7 +423,7 @@ function bindUploadModal() {
       }
 
       if (btn) {
-        btn.disabled    = true;
+        btn.disabled = true;
         btn.textContent = "Uploading… please wait";
       }
 
@@ -396,17 +434,16 @@ function bindUploadModal() {
         modal.classList.remove("flex");
         form.reset();
         document.getElementById("video-file-name").textContent = "";
-        document.getElementById("thumbnail-name").textContent  = "";
+        document.getElementById("thumbnail-name").textContent = "";
         mountDashboardPage();
       } catch (err) {
         showToast(err.message, "error");
       } finally {
         if (btn) {
-          btn.disabled    = false;
+          btn.disabled = false;
           btn.textContent = "Publish Video";
         }
       }
     };
   }
 }
-

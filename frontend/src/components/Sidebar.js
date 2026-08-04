@@ -11,9 +11,20 @@ const icons = {
 };
 
 const navItems = [
-  { label: "Home",      href: "#/",          icon: icons.home,      match: (p) => p === "/" },
-  { label: "Community", href: "#/tweets",    icon: icons.tweets,    match: (p) => p.startsWith("/tweets") },
-  { label: "Dashboard", href: "#/dashboard", icon: icons.dashboard, match: (p) => p.startsWith("/dashboard"), protected: true },
+  { label: "Home", href: "#/", icon: icons.home, match: (p) => p === "/" },
+  {
+    label: "Community",
+    href: "#/tweets",
+    icon: icons.tweets,
+    match: (p) => p.startsWith("/tweets"),
+  },
+  {
+    label: "Dashboard",
+    href: "#/dashboard",
+    icon: icons.dashboard,
+    match: (p) => p.startsWith("/dashboard"),
+    protected: true,
+  },
 ];
 
 export function createSidebar(currentPath = "/") {
@@ -27,9 +38,10 @@ export function createSidebar(currentPath = "/") {
     ? `#/channel/${user.uname}`
     : `#/login?redirect=/dashboard`;
 
-  const userAvatar = isAuthenticated && user.avatar
-    ? `<img src="${user.avatar}" class="h-full w-full object-cover" alt="" />`
-    : `<span class="text-xs font-bold">${getInitials(user?.fullname || "U")}</span>`;
+  const userAvatar =
+    isAuthenticated && user.avatar
+      ? `<img src="${user.avatar}" class="h-full w-full object-cover" alt="" />`
+      : `<span class="text-xs font-bold">${getInitials(user?.fullname || "U")}</span>`;
 
   sidebar.innerHTML = `
     
@@ -116,19 +128,21 @@ export function createSidebar(currentPath = "/") {
 
 export function bindSidebarEvents(sidebar) {
   const closeBtn = sidebar.querySelector("#sidebar-close");
-  const overlay  = document.getElementById("sidebar-overlay");
+  const overlay = document.getElementById("sidebar-overlay");
 
   closeBtn?.addEventListener("click", () => {
     sidebar.classList.add("-translate-x-full");
     overlay?.classList.add("hidden");
   });
 
-  sidebar.querySelectorAll("[data-nav-link], [data-logo-link]").forEach((link) => {
-    link.addEventListener("click", () => {
-      sidebar.classList.add("-translate-x-full");
-      overlay?.classList.add("hidden");
+  sidebar
+    .querySelectorAll("[data-nav-link], [data-logo-link]")
+    .forEach((link) => {
+      link.addEventListener("click", () => {
+        sidebar.classList.add("-translate-x-full");
+        overlay?.classList.add("hidden");
+      });
     });
-  });
 }
 
 export function openSidebar() {
@@ -146,6 +160,6 @@ export function updateSidebarActiveState(currentPath) {
       path === currentPath ||
       (path.startsWith("/channel") && currentPath.startsWith("/channel"));
     link.classList.toggle("nav-link-active", isActive);
-    link.classList.toggle("nav-link", !isActive || true); 
+    link.classList.toggle("nav-link", !isActive || true);
   });
 }

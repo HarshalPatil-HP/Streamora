@@ -1,13 +1,13 @@
-import { Router } from "express"
+import { Router } from "express";
 import {
-    getChannelStats,
-    getChannelVideos
-} from "../controllers/dashboard.controller.js"
-import { authmiddleware } from "../middlewares/auth.middleware.js"
+  getChannelStats,
+  getChannelVideos,
+} from "../controllers/dashboard.controller.js";
+import { authmiddleware } from "../middlewares/auth.middleware.js";
 
-const router = Router()
+const router = Router();
 
-router.route("/stats").get(authmiddleware, getChannelStats)
-router.route("/videos").get(authmiddleware, getChannelVideos)
+router.route("/stats").get(authmiddleware, getChannelStats);
+router.route("/videos").get(authmiddleware, getChannelVideos);
 
-export default router
+export default router;

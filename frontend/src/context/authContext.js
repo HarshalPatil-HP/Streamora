@@ -66,7 +66,9 @@ export async function logoutUser() {
 
 export function requireAuth(redirectPath) {
   if (state.isAuthenticated) return true;
-  const redirect = redirectPath ? `?redirect=${encodeURIComponent(redirectPath)}` : "";
+  const redirect = redirectPath
+    ? `?redirect=${encodeURIComponent(redirectPath)}`
+    : "";
   window.location.hash = `#/login${redirect}`;
   return false;
 }

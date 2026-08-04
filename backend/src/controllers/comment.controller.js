@@ -1,181 +1,176 @@
-import mongoose, { isValidObjectId } from "mongoose"
-import { Comment } from "../models/comment.models.js"
-import { Video } from "../models/video.models.js"
-import { apireject } from "../utils/Apireject.js"
-import { Apiresolve } from "../utils/Apiresolved.js"
-import { asynchandler } from "../utils/asynchandler.js"
+import mongoose, { isValidObjectId } from "mongoose";
+import { Comment } from "../models/comment.models.js";
+import { Video } from "../models/video.models.js";
+import { apireject } from "../utils/Apireject.js";
+import { Apiresolve } from "../utils/Apiresolved.js";
+import { asynchandler } from "../utils/asynchandler.js";
 
 const getVideoComments = asynchandler(async (req, res) => {
-    const { videoId } = req.params
-    const { page = 1, limit = 10 } = req.query
+  const { videoId } = req.params;
+  const { page = 1, limit = 10 } = req.query;
 
-    if (!isValidObjectId(videoId)) {
-        throw new apireject(400, "Invalid video id")
-    }
+  if (!isValidObjectId(videoId)) {
+    throw new apireject(400, "Invalid video id");
+  }
 
-    const video = await Video.findById(videoId)
-    if (!video) {
-        throw new apireject(404, "Video not found")
-    }
+  const video = await Video.findById(videoId);
+  if (!video) {
+    throw new apireject(404, "Video not found");
+  }
 
-    const commentAggregate = Comment.aggregate([
-        {
-            $match: {
-                video: new mongoose.Types.ObjectId(videoId)
-            }
+  const commentAggregate = Comment.aggregate([
+    {
+      $match: {
+        video: new mongoose.Types.ObjectId(videoId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+        pipeline: [
+          {
+            $project: {
+              fullname: 1,
+              uname: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        owner: { $first: "$owner" },
+      },
+    },
+    // Join likes for this comment to get count + current user's like
+    {
+      $lookup: {
+        from: "likes",
+        localField: "_id",
+        foreignField: "comment",
+        as: "likes",
+      },
+    },
+    {
+      $addFields: {
+        likeCount: { $size: "$likes" },
+        isLikedByCurrentUser: {
+          $in: [
+            req.user?._id ? new mongoose.Types.ObjectId(req.user._id) : null,
+            { $ifNull: ["$likes.likedBy", []] },
+          ],
         },
-        {
-            $lookup: {
-                from: "users",
-                localField: "owner",
-                foreignField: "_id",
-                as: "owner",
-                pipeline: [
-                    {
-                        $project: {
-                            fullname: 1,
-                            uname: 1,
-                            avatar: 1
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            $addFields: {
-                owner: { $first: "$owner" }
-            }
-        },
-        // Join likes for this comment to get count + current user's like
-        {
-            $lookup: {
-                from: "likes",
-                localField: "_id",
-                foreignField: "comment",
-                as: "likes"
-            }
-        },
-        {
-            $addFields: {
-                likeCount: { $size: "$likes" },
-                isLikedByCurrentUser: {
-                    $in: [
-                        req.user?._id ? new mongoose.Types.ObjectId(req.user._id) : null,
-                        { $ifNull: ["$likes.likedBy", []] }
-                    ]
-                }
-            }
-        },
-        { $project: { likes: 0 } }  // Don't send full likes array to client
-    ])
+      },
+    },
+    { $project: { likes: 0 } }, // Don't send full likes array to client
+  ]);
 
-    const options = {
-        page: parseInt(page),
-        limit: parseInt(limit)
-    }
+  const options = {
+    page: parseInt(page),
+    limit: parseInt(limit),
+  };
 
-    const comments = await Comment.aggregatePaginate(commentAggregate, options)
+  const comments = await Comment.aggregatePaginate(commentAggregate, options);
 
-    return res
-        .status(200)
-        .json(new Apiresolve(200, comments, "Comments fetched successfully"))
-})
+  return res
+    .status(200)
+    .json(new Apiresolve(200, comments, "Comments fetched successfully"));
+});
 
 const addComment = asynchandler(async (req, res) => {
-    const { videoId } = req.params
-    const { contend } = req.body
+  const { videoId } = req.params;
+  const { contend } = req.body;
 
-    if (!isValidObjectId(videoId)) {
-        throw new apireject(400, "Invalid video id")
-    }
+  if (!isValidObjectId(videoId)) {
+    throw new apireject(400, "Invalid video id");
+  }
 
-    if (!contend?.trim()) {
-        throw new apireject(400, "Comment content is required")
-    }
-    
-    if (contend.length > 1000) {
-        throw new apireject(400, "Comment is too long (max 1000 characters)")
-    }
+  if (!contend?.trim()) {
+    throw new apireject(400, "Comment content is required");
+  }
 
-    const video = await Video.findById(videoId)
-    if (!video) {
-        throw new apireject(404, "Video not found")
-    }
+  if (contend.length > 1000) {
+    throw new apireject(400, "Comment is too long (max 1000 characters)");
+  }
 
-    const comment = await Comment.create({
-        contend,
-        video: videoId,
-        owner: req.user._id
-    })
+  const video = await Video.findById(videoId);
+  if (!video) {
+    throw new apireject(404, "Video not found");
+  }
 
-    const createdComment = await Comment.findById(comment._id)
+  const comment = await Comment.create({
+    contend,
+    video: videoId,
+    owner: req.user._id,
+  });
 
-    return res
-        .status(201)
-        .json(new Apiresolve(201, createdComment, "Comment added successfully"))
-})
+  const createdComment = await Comment.findById(comment._id);
+
+  return res
+    .status(201)
+    .json(new Apiresolve(201, createdComment, "Comment added successfully"));
+});
 
 const updateComment = asynchandler(async (req, res) => {
-    const { commentId } = req.params
-    const { contend } = req.body
+  const { commentId } = req.params;
+  const { contend } = req.body;
 
-    if (!isValidObjectId(commentId)) {
-        throw new apireject(400, "Invalid comment id")
-    }
+  if (!isValidObjectId(commentId)) {
+    throw new apireject(400, "Invalid comment id");
+  }
 
-    if (!contend?.trim()) {
-        throw new apireject(400, "Comment content is required")
-    }
-    
-    if (contend.length > 1000) {
-        throw new apireject(400, "Comment is too long (max 1000 characters)")
-    }
+  if (!contend?.trim()) {
+    throw new apireject(400, "Comment content is required");
+  }
 
-    const comment = await Comment.findById(commentId)
+  if (contend.length > 1000) {
+    throw new apireject(400, "Comment is too long (max 1000 characters)");
+  }
 
-    if (!comment) {
-        throw new apireject(404, "Comment not found")
-    }
+  const comment = await Comment.findById(commentId);
 
-    if (comment.owner.toString() !== req.user._id.toString()) {
-        throw new apireject(403, "You are not allowed to update this comment")
-    }
+  if (!comment) {
+    throw new apireject(404, "Comment not found");
+  }
 
-    comment.contend = contend
-    await comment.save()
+  if (comment.owner.toString() !== req.user._id.toString()) {
+    throw new apireject(403, "You are not allowed to update this comment");
+  }
 
-    return res
-        .status(200)
-        .json(new Apiresolve(200, comment, "Comment updated successfully"))
-})
+  comment.contend = contend;
+  await comment.save();
+
+  return res
+    .status(200)
+    .json(new Apiresolve(200, comment, "Comment updated successfully"));
+});
 
 const deleteComment = asynchandler(async (req, res) => {
-    const { commentId } = req.params
+  const { commentId } = req.params;
 
-    if (!isValidObjectId(commentId)) {
-        throw new apireject(400, "Invalid comment id")
-    }
+  if (!isValidObjectId(commentId)) {
+    throw new apireject(400, "Invalid comment id");
+  }
 
-    const comment = await Comment.findById(commentId)
+  const comment = await Comment.findById(commentId);
 
-    if (!comment) {
-        throw new apireject(404, "Comment not found")
-    }
+  if (!comment) {
+    throw new apireject(404, "Comment not found");
+  }
 
-    if (comment.owner.toString() !== req.user._id.toString()) {
-        throw new apireject(403, "You are not allowed to delete this comment")
-    }
+  if (comment.owner.toString() !== req.user._id.toString()) {
+    throw new apireject(403, "You are not allowed to delete this comment");
+  }
 
-    await Comment.findByIdAndDelete(commentId)
+  await Comment.findByIdAndDelete(commentId);
 
-    return res
-        .status(200)
-        .json(new Apiresolve(200, {}, "Comment deleted successfully"))
-})
+  return res
+    .status(200)
+    .json(new Apiresolve(200, {}, "Comment deleted successfully"));
+});
 
-export {
-    getVideoComments,
-    addComment,
-    updateComment,
-    deleteComment
-}
+export { getVideoComments, addComment, updateComment, deleteComment };

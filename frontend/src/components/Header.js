@@ -99,11 +99,11 @@ export function createHeader() {
 }
 
 export function bindHeaderEvents(header, onSidebarToggle) {
-  const toggleBtn    = header.querySelector("#sidebar-toggle");
-  const userMenuBtn  = header.querySelector("#user-menu-btn");
+  const toggleBtn = header.querySelector("#sidebar-toggle");
+  const userMenuBtn = header.querySelector("#user-menu-btn");
   const userDropdown = header.querySelector("#user-dropdown");
-  const searchForm   = header.querySelector("#search-form");
-  const logoutBtn    = header.querySelector("#logout-btn");
+  const searchForm = header.querySelector("#search-form");
+  const logoutBtn = header.querySelector("#logout-btn");
 
   toggleBtn?.addEventListener("click", onSidebarToggle);
 

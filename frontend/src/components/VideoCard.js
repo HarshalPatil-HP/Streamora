@@ -1,18 +1,23 @@
-import { formatViews, formatDuration, escapeHtml, formatDate } from "../utils/format.js";
+import {
+  formatViews,
+  formatDuration,
+  escapeHtml,
+  formatDate,
+} from "../utils/format.js";
 
 export function renderVideoCard(video, ownerOverride = null) {
-  const id        = video._id;
-  const title     = escapeHtml(video.title);
+  const id = video._id;
+  const title = escapeHtml(video.title);
   const thumbnail = escapeHtml(video.thumbnail || "");
-  const views     = formatViews(video.views);
-  const duration  = formatDuration(video.durationNumber);
-  const timeAgo   = formatDate(video.createdAt);
+  const views = formatViews(video.views);
+  const duration = formatDuration(video.durationNumber);
+  const timeAgo = formatDate(video.createdAt);
 
   // Prefer embedded ownerDetails (from JOIN), then override arg, then empty fallback
-  const owner       = video.ownerDetails || ownerOverride || {};
-  const ownerName   = escapeHtml(owner.fullname || owner.uname || "Creator");
+  const owner = video.ownerDetails || ownerOverride || {};
+  const ownerName = escapeHtml(owner.fullname || owner.uname || "Creator");
   const ownerAvatar = owner.avatar || null;
-  const ownerUname  = owner.uname || null;
+  const ownerUname = owner.uname || null;
 
   return `
     <a href="#/watch/${id}"

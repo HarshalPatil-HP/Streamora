@@ -9,14 +9,62 @@ import { PlaylistPage, mountPlaylistPage } from "./pages/PlaylistPage.js";
 import { getAuthState } from "./context/authContext.js";
 
 const routes = [
-  { path: "/", component: HomePage, mount: mountHomePage, layout: true, public: true },
-  { path: "/tweets", component: TweetFeedPage, mount: mountTweetFeedPage, layout: true, public: true },
-  { path: "/dashboard", component: DashboardPage, mount: mountDashboardPage, layout: true, protected: true },
-  { path: "/watch/:id", component: WatchPage, mount: mountWatchPage, layout: true, public: true },
-  { path: "/channel/:username", component: ChannelPage, mount: mountChannelPage, layout: true, public: true },
-  { path: "/playlist/:id", component: PlaylistPage, mount: mountPlaylistPage, layout: true, public: true },
-  { path: "/login", component: LoginPage, mount: mountLoginPage, layout: false, guestOnly: true },
-  { path: "/signup", component: SignupPage, mount: mountSignupPage, layout: false, guestOnly: true },
+  {
+    path: "/",
+    component: HomePage,
+    mount: mountHomePage,
+    layout: true,
+    public: true,
+  },
+  {
+    path: "/tweets",
+    component: TweetFeedPage,
+    mount: mountTweetFeedPage,
+    layout: true,
+    public: true,
+  },
+  {
+    path: "/dashboard",
+    component: DashboardPage,
+    mount: mountDashboardPage,
+    layout: true,
+    protected: true,
+  },
+  {
+    path: "/watch/:id",
+    component: WatchPage,
+    mount: mountWatchPage,
+    layout: true,
+    public: true,
+  },
+  {
+    path: "/channel/:username",
+    component: ChannelPage,
+    mount: mountChannelPage,
+    layout: true,
+    public: true,
+  },
+  {
+    path: "/playlist/:id",
+    component: PlaylistPage,
+    mount: mountPlaylistPage,
+    layout: true,
+    public: true,
+  },
+  {
+    path: "/login",
+    component: LoginPage,
+    mount: mountLoginPage,
+    layout: false,
+    guestOnly: true,
+  },
+  {
+    path: "/signup",
+    component: SignupPage,
+    mount: mountSignupPage,
+    layout: false,
+    guestOnly: true,
+  },
 ];
 
 function matchRoute(pathname) {
@@ -65,7 +113,6 @@ export function parseHash() {
 
 export function navigate(path) {
   window.location.hash = path.startsWith("#") ? path : `#${path}`;
-  
 }
 
 export function getRedirectPath() {
@@ -79,7 +126,13 @@ export function getRouteRenderer() {
     const matched = matchRoute(pathname);
 
     if (!matched) {
-      return { html: "", layout: true, notFound: true, mount: null, route: null };
+      return {
+        html: "",
+        layout: true,
+        notFound: true,
+        mount: null,
+        route: null,
+      };
     }
 
     const { route, params: routeParams } = matched;
@@ -89,12 +142,26 @@ export function getRouteRenderer() {
     if (route.protected && !isAuthenticated) {
       const redirect = encodeURIComponent(pathname);
       navigate(`/login?redirect=${redirect}`);
-      return { html: "", layout: false, blocked: true, mount: null, route: null, params: allParams };
+      return {
+        html: "",
+        layout: false,
+        blocked: true,
+        mount: null,
+        route: null,
+        params: allParams,
+      };
     }
 
     if (route.guestOnly && isAuthenticated) {
       navigate("/");
-      return { html: "", layout: true, blocked: true, mount: null, route: null, params: allParams };
+      return {
+        html: "",
+        layout: true,
+        blocked: true,
+        mount: null,
+        route: null,
+        params: allParams,
+      };
     }
 
     const html = await route.component(allParams);

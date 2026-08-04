@@ -6,6 +6,8 @@ export async function getDashboardStats() {
 }
 
 export async function getDashboardVideos(page = 1) {
-  const { data } = await api.get("/dashboard/videos", { params: { page, limit: 20 } });
+  const { data } = await api.get("/dashboard/videos", {
+    params: { page, limit: 20 },
+  });
   return data.data;
 }

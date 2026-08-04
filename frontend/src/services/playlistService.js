@@ -11,7 +11,10 @@ export async function getPlaylistById(playlistId) {
 }
 
 export async function createPlaylist({ name, description }) {
-  const { data } = await api.post("/playlists", { name, description: description || " " });
+  const { data } = await api.post("/playlists", {
+    name,
+    description: description || " ",
+  });
   return data.data;
 }
 
@@ -21,7 +24,9 @@ export async function addVideoToPlaylist(playlistId, videoId) {
 }
 
 export async function removeVideoFromPlaylist(playlistId, videoId) {
-  const { data } = await api.patch(`/playlists/remove/${videoId}/${playlistId}`);
+  const { data } = await api.patch(
+    `/playlists/remove/${videoId}/${playlistId}`,
+  );
   return data.data;
 }
 

@@ -16,14 +16,27 @@
     @apply min-h-full;
   }
 
-  ::-webkit-scrollbar        { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track  { background: transparent; }
-  ::-webkit-scrollbar-thumb  { @apply rounded-full bg-[#DCDCDC]; }
-  ::-webkit-scrollbar-thumb:hover { @apply bg-[#B0B0B0]; }
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-[#DCDCDC];
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-[#B0B0B0];
+  }
 
   /* ── Sidebar dark scrollbar ──────────────────────── */
-  #sidebar ::-webkit-scrollbar-thumb  { background: #2A2A2A; }
-  #sidebar ::-webkit-scrollbar-thumb:hover { background: #3A3A3A; }
+  #sidebar ::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+  }
+  #sidebar ::-webkit-scrollbar-thumb:hover {
+    background: #3a3a3a;
+  }
 
   *,
   *::before,
@@ -33,7 +46,6 @@
 }
 
 @layer components {
-
   .app-shell {
     @apply relative flex min-h-screen bg-[#F7F7F7];
   }
@@ -45,7 +57,7 @@
 
   .auth-page {
     @apply relative flex min-h-screen items-center justify-center overflow-hidden p-4;
-    background-color: #0F0F14;
+    background-color: #0f0f14;
   }
 
   .glass-card {
@@ -64,7 +76,7 @@
   .nav-link-active {
     background-color: rgba(255, 255, 255, 0.08);
     @apply text-white font-semibold;
-    border-left: 2.5px solid #FFFFFF;
+    border-left: 2.5px solid #ffffff;
     padding-left: calc(1rem - 2.5px);
   }
 
@@ -174,14 +186,22 @@
   /* ─────────────────────────────────────────────────────
      Page header utility
   ───────────────────────────────────────────────────── */
-  .page-title    { @apply text-2xl font-bold tracking-tight text-[#0A0A0A]; }
-  .page-subtitle { @apply mt-1 text-sm text-[#888888]; }
+  .page-title {
+    @apply text-2xl font-bold tracking-tight text-[#0A0A0A];
+  }
+  .page-subtitle {
+    @apply mt-1 text-sm text-[#888888];
+  }
 
   /* ─────────────────────────────────────────────────────
      Divider
   ───────────────────────────────────────────────────── */
-  .divider      { @apply my-4 border-t border-[#E8E8E8]; }
-  .divider-dark { @apply my-4 border-t border-[#252525]; }
+  .divider {
+    @apply my-4 border-t border-[#E8E8E8];
+  }
+  .divider-dark {
+    @apply my-4 border-t border-[#252525];
+  }
 
   /* ─────────────────────────────────────────────────────
      Sort / Filter Pills (Home page)
@@ -211,4 +231,3 @@
     @apply fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm;
   }
 }
-

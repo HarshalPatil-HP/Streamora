@@ -1,4 +1,9 @@
-import { createSidebar, bindSidebarEvents, openSidebar, updateSidebarActiveState } from "./Sidebar.js";
+import {
+  createSidebar,
+  bindSidebarEvents,
+  openSidebar,
+  updateSidebarActiveState,
+} from "./Sidebar.js";
 import { createHeader, bindHeaderEvents } from "./Header.js";
 
 export function createLayout(currentPath = "/") {
