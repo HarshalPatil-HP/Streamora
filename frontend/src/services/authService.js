@@ -6,9 +6,7 @@ export async function login(email, password) {
 }
 
 export async function register(formData) {
-  const { data } = await api.post("/user/register", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await api.post("/user/register", formData);
   return data.data;
 }
 
