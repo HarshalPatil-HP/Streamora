@@ -35,13 +35,13 @@ export function LoginPage() {
           <form id="login-form" class="space-y-4 px-8 py-6">
             <div>
               <label class="mb-1.5 block text-xs font-medium text-[#888]">Email</label>
-              <input type="email" name="email" required
+              <input type="email" name="email" id="email" required
                 class="w-full rounded-xl border border-[#2E2E3A] bg-[#252530] px-4 py-2.5 text-sm text-white placeholder-[#555] outline-none transition-all focus:border-[#666] focus:ring-2 focus:ring-white/10"
                 placeholder="you@example.com" autocomplete="email" />
             </div>
             <div>
               <label class="mb-1.5 block text-xs font-medium text-[#888]">Password</label>
-              <input type="password" name="password" required
+              <input type="password" name="password" id="password" required
                 class="w-full rounded-xl border border-[#2E2E3A] bg-[#252530] px-4 py-2.5 text-sm text-white placeholder-[#555] outline-none transition-all focus:border-[#666] focus:ring-2 focus:ring-white/10"
                 placeholder="Enter your password" autocomplete="current-password" />
             </div>
