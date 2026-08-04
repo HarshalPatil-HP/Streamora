@@ -26,19 +26,50 @@ const toggleVideoLike = asynchandler(async (req, res) => {
 
     if (existingLike) {
         await Like.findByIdAndDelete(existingLike._id)
+        const likeCount = await Like.countDocuments({ video: videoId })
         return res
             .status(200)
-            .json(new Apiresolve(200, { liked: false }, "Video unliked successfully"))
+            .json(new Apiresolve(200, { liked: false, likeCount }, "Video unliked successfully"))
     }
 
-    await Like.create({
-        video: videoId,
-        likedBy: req.user._id
-    })
+    try {
+        await Like.create({
+            video: videoId,
+            likedBy: req.user._id
+        })
+    } catch (err) {
+        // Handle race-condition duplicate key (unique index violation)
+        if (err.code === 11000) {
+            const likeCount = await Like.countDocuments({ video: videoId })
+            return res.status(200).json(new Apiresolve(200, { liked: true, likeCount }, "Video already liked"))
+        }
+        throw err
+    }
+
+    const likeCount = await Like.countDocuments({ video: videoId })
+    return res
+        .status(200)
+        .json(new Apiresolve(200, { liked: true, likeCount }, "Video liked successfully"))
+})
+
+const getVideoLikeStatus = asynchandler(async (req, res) => {
+    const { videoId } = req.params
+
+    if (!isValidObjectId(videoId)) {
+        throw new apireject(400, "Invalid video id")
+    }
+
+    const likeCount = await Like.countDocuments({ video: videoId })
+    let liked = false
+
+    if (req.user?._id) {
+        const existingLike = await Like.findOne({ video: videoId, likedBy: req.user._id })
+        liked = Boolean(existingLike)
+    }
 
     return res
         .status(200)
-        .json(new Apiresolve(200, { liked: true }, "Video liked successfully"))
+        .json(new Apiresolve(200, { liked, likeCount }, "Like status fetched"))
 })
 
 const toggleCommentLike = asynchandler(async (req, res) => {
@@ -60,19 +91,49 @@ const toggleCommentLike = asynchandler(async (req, res) => {
 
     if (existingLike) {
         await Like.findByIdAndDelete(existingLike._id)
+        const likeCount = await Like.countDocuments({ comment: commentId })
         return res
             .status(200)
-            .json(new Apiresolve(200, { liked: false }, "Comment unliked successfully"))
+            .json(new Apiresolve(200, { liked: false, likeCount }, "Comment unliked successfully"))
     }
 
-    await Like.create({
-        comment: commentId,
-        likedBy: req.user._id
-    })
+    try {
+        await Like.create({
+            comment: commentId,
+            likedBy: req.user._id
+        })
+    } catch (err) {
+        if (err.code === 11000) {
+            const likeCount = await Like.countDocuments({ comment: commentId })
+            return res.status(200).json(new Apiresolve(200, { liked: true, likeCount }, "Comment already liked"))
+        }
+        throw err
+    }
+
+    const likeCount = await Like.countDocuments({ comment: commentId })
+    return res
+        .status(200)
+        .json(new Apiresolve(200, { liked: true, likeCount }, "Comment liked successfully"))
+})
+
+const getCommentLikeStatus = asynchandler(async (req, res) => {
+    const { commentId } = req.params
+
+    if (!isValidObjectId(commentId)) {
+        throw new apireject(400, "Invalid comment id")
+    }
+
+    const likeCount = await Like.countDocuments({ comment: commentId })
+    let liked = false
+
+    if (req.user?._id) {
+        const existingLike = await Like.findOne({ comment: commentId, likedBy: req.user._id })
+        liked = Boolean(existingLike)
+    }
 
     return res
         .status(200)
-        .json(new Apiresolve(200, { liked: true }, "Comment liked successfully"))
+        .json(new Apiresolve(200, { liked, likeCount }, "Comment like status fetched"))
 })
 
 const toggleTweetLike = asynchandler(async (req, res) => {
@@ -94,19 +155,49 @@ const toggleTweetLike = asynchandler(async (req, res) => {
 
     if (existingLike) {
         await Like.findByIdAndDelete(existingLike._id)
+        const likeCount = await Like.countDocuments({ tweet: tweetId })
         return res
             .status(200)
-            .json(new Apiresolve(200, { liked: false }, "Tweet unliked successfully"))
+            .json(new Apiresolve(200, { liked: false, likeCount }, "Tweet unliked successfully"))
     }
 
-    await Like.create({
-        tweet: tweetId,
-        likedBy: req.user._id
-    })
+    try {
+        await Like.create({
+            tweet: tweetId,
+            likedBy: req.user._id
+        })
+    } catch (err) {
+        if (err.code === 11000) {
+            const likeCount = await Like.countDocuments({ tweet: tweetId })
+            return res.status(200).json(new Apiresolve(200, { liked: true, likeCount }, "Tweet already liked"))
+        }
+        throw err
+    }
+
+    const likeCount = await Like.countDocuments({ tweet: tweetId })
+    return res
+        .status(200)
+        .json(new Apiresolve(200, { liked: true, likeCount }, "Tweet liked successfully"))
+})
+
+const getTweetLikeStatus = asynchandler(async (req, res) => {
+    const { tweetId } = req.params
+
+    if (!isValidObjectId(tweetId)) {
+        throw new apireject(400, "Invalid tweet id")
+    }
+
+    const likeCount = await Like.countDocuments({ tweet: tweetId })
+    let liked = false
+
+    if (req.user?._id) {
+        const existingLike = await Like.findOne({ tweet: tweetId, likedBy: req.user._id })
+        liked = Boolean(existingLike)
+    }
 
     return res
         .status(200)
-        .json(new Apiresolve(200, { liked: true }, "Tweet liked successfully"))
+        .json(new Apiresolve(200, { liked, likeCount }, "Tweet like status fetched"))
 })
 
 const getLikedVideos = asynchandler(async (req, res) => {
@@ -135,7 +226,7 @@ const getLikedVideos = asynchandler(async (req, res) => {
                                     $project: {
                                         fullname: 1,
                                         uname: 1,
-                                        avtar: 1
+                                        avatar: 1
                                     }
                                 }
                             ]
@@ -165,5 +256,8 @@ export {
     toggleCommentLike,
     toggleTweetLike,
     toggleVideoLike,
-    getLikedVideos
+    getLikedVideos,
+    getVideoLikeStatus,
+    getCommentLikeStatus,
+    getTweetLikeStatus
 }

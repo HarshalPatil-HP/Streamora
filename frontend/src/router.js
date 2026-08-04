@@ -5,6 +5,7 @@ import { ChannelPage, mountChannelPage } from "./pages/ChannelPage.js";
 import { DashboardPage, mountDashboardPage } from "./pages/DashboardPage.js";
 import { LoginPage, mountLoginPage } from "./pages/LoginPage.js";
 import { SignupPage, mountSignupPage } from "./pages/SignupPage.js";
+import { PlaylistPage, mountPlaylistPage } from "./pages/PlaylistPage.js";
 import { getAuthState } from "./context/authContext.js";
 
 const routes = [
@@ -13,6 +14,7 @@ const routes = [
   { path: "/dashboard", component: DashboardPage, mount: mountDashboardPage, layout: true, protected: true },
   { path: "/watch/:id", component: WatchPage, mount: mountWatchPage, layout: true, public: true },
   { path: "/channel/:username", component: ChannelPage, mount: mountChannelPage, layout: true, public: true },
+  { path: "/playlist/:id", component: PlaylistPage, mount: mountPlaylistPage, layout: true, public: true },
   { path: "/login", component: LoginPage, mount: mountLoginPage, layout: false, guestOnly: true },
   { path: "/signup", component: SignupPage, mount: mountSignupPage, layout: false, guestOnly: true },
 ];

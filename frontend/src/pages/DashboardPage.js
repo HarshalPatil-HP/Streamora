@@ -1,8 +1,10 @@
 import { getDashboardStats, getDashboardVideos } from "../services/dashboardService.js";
 import { publishVideo, deleteVideo, togglePublish } from "../services/videoService.js";
-import { getAuthState } from "../context/authContext.js";
+import { getUserTweets, deleteTweet } from "../services/tweetService.js";
+import api from "../services/api.js";
+import { getAuthState, setAuthUser } from "../context/authContext.js";
 import { renderSpinner, renderEmptyState, showToast } from "../utils/ui.js";
-import { escapeHtml, formatViews, formatDate } from "../utils/format.js";
+import { escapeHtml, formatViews, formatDate, getInitials } from "../utils/format.js";
 
 export function DashboardPage() {
   const { user } = getAuthState();
@@ -77,13 +79,19 @@ export function DashboardPage() {
 export async function mountDashboardPage() {
   const root = document.getElementById("dashboard-root");
   if (!root) return;
+  const { user } = getAuthState();
+  
+  // Maintain active tab across re-renders
+  window.dashboardTab = window.dashboardTab || "videos";
 
   try {
-    const [stats, videosResult] = await Promise.all([
+    const [stats, videosResult, tweetsResult] = await Promise.all([
       getDashboardStats(),
       getDashboardVideos(),
+      getUserTweets(user._id).catch(() => [])
     ]);
     const videos = videosResult?.docs || [];
+    const tweets = Array.isArray(tweetsResult) ? tweetsResult : (tweetsResult?.docs || []);
 
     root.innerHTML = `
       <!-- Stat Cards -->
@@ -94,14 +102,21 @@ export async function mountDashboardPage() {
         ${statCard("Total Likes",    formatViews(stats.totalLikes),       heartIcon(),  "likes")}
       </div>
 
-      <!-- Videos Table -->
+      <!-- Tab Toggle -->
+      <div class="mb-4 flex gap-2 border-b border-[#E8E8E8] pb-px">
+        <button data-dashboard-tab="videos" class="${window.dashboardTab === 'videos' ? 'border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-bold' : 'text-[#888] font-medium hover:text-[#0A0A0A]'} px-4 py-2 text-sm transition-colors">Videos</button>
+        <button data-dashboard-tab="tweets" class="${window.dashboardTab === 'tweets' ? 'border-b-2 border-[#0A0A0A] text-[#0A0A0A] font-bold' : 'text-[#888] font-medium hover:text-[#0A0A0A]'} px-4 py-2 text-sm transition-colors">Community Posts</button>
+      </div>
+
+      <!-- Table Area -->
       <div class="surface-card overflow-hidden !p-0">
         <div class="flex items-center justify-between border-b border-[#F3F3F3] px-6 py-4">
-          <h2 class="font-bold text-[#0A0A0A]">Your Videos</h2>
-          <span class="badge">${videos.length} total</span>
+          <h2 class="font-bold text-[#0A0A0A]">${window.dashboardTab === "videos" ? "Your Videos" : "Your Community Posts"}</h2>
+          <span class="badge">${window.dashboardTab === "videos" ? videos.length : tweets.length} total</span>
         </div>
         ${
-          videos.length
+          window.dashboardTab === "videos"
+          ? (videos.length
             ? `
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
@@ -153,18 +168,85 @@ export async function mountDashboardPage() {
                 title: "No videos yet",
                 description: "Upload your first video to get started.",
                 actionHtml: `<button id="upload-empty-btn" class="btn-primary">Upload Video</button>`,
-              })
+              }))
+          : (tweets.length
+            ? `
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="border-b border-[#F3F3F3] bg-[#F9F9F9]">
+                <tr>
+                  <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-[#888]">Content</th>
+                  <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-[#888]">Likes</th>
+                  <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-[#888]">Date</th>
+                  <th class="px-6 py-3 text-xs font-semibold uppercase tracking-wider text-[#888]">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#F3F3F3]">
+                ${tweets
+                  .map(
+                    (t) => `
+                  <tr class="group hover:bg-[#FAFAFA] transition-colors" data-tweet-id="${t._id}">
+                    <td class="px-6 py-4">
+                      <span class="font-medium text-[#0A0A0A] line-clamp-1 max-w-[300px]">${escapeHtml(t.contend)}</span>
+                    </td>
+                    <td class="px-6 py-4 text-[#555]">${t.likeCount || 0}</td>
+                    <td class="px-6 py-4 text-[#888] text-xs">${formatDate(t.createdAt)}</td>
+                    <td class="px-6 py-4">
+                      <button data-action="delete-tweet" class="rounded-lg border border-red-100 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-100 transition-all">
+                        Delete
+                      </button>
+                    </td>
+                  </tr>`
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>`
+            : renderEmptyState({
+                title: "No posts yet",
+                description: "You haven't posted any community updates.",
+                actionHtml: `<a href="#/tweets" class="btn-primary">Go to Community</a>`,
+              }))
         }
       </div>
     `;
 
+    // Bind tab clicks
+    root.querySelectorAll("[data-dashboard-tab]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        window.dashboardTab = btn.dataset.dashboardTab;
+        mountDashboardPage();
+      });
+    });
+
     root.querySelectorAll("[data-action]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        const row     = btn.closest("[data-video-id]");
+        const action = btn.dataset.action;
+        
+        if (action === "delete-tweet") {
+          const row = btn.closest("[data-tweet-id]");
+          const tweetId = row?.dataset.tweetId;
+          if (!tweetId) return;
+          if (!confirm("Are you sure you want to delete this post? This cannot be undone.")) return;
+          btn.textContent = "Deleting…";
+          btn.disabled = true;
+          try {
+            await deleteTweet(tweetId);
+            showToast("Post deleted", "success");
+            mountDashboardPage();
+          } catch (err) {
+            showToast(err.message, "error");
+            btn.disabled = false;
+            btn.textContent = "Delete";
+          }
+          return;
+        }
+
+        const row = btn.closest("[data-video-id]");
         const videoId = row?.dataset.videoId;
         if (!videoId) return;
 
-        if (btn.dataset.action === "delete") {
+        if (action === "delete") {
           if (!confirm("Are you sure you want to delete this video? This cannot be undone.")) return;
           btn.textContent = "Deleting…";
           btn.disabled    = true;
@@ -177,7 +259,7 @@ export async function mountDashboardPage() {
             btn.disabled    = false;
             btn.textContent = "Delete";
           }
-        } else {
+        } else if (action === "toggle") {
           btn.disabled    = true;
           btn.textContent = "Updating…";
           try {
@@ -194,6 +276,7 @@ export async function mountDashboardPage() {
 
     bindUploadModal();
     document.getElementById("upload-empty-btn")?.addEventListener("click", openUploadModal);
+
   } catch (err) {
     root.innerHTML = renderEmptyState({
       title: "Dashboard error",
@@ -201,6 +284,7 @@ export async function mountDashboardPage() {
     });
   }
 }
+
 
 function statCard(label, value, iconSvg, id) {
   return `
@@ -257,27 +341,72 @@ function bindUploadModal() {
     if (el) el.textContent = e.target.files[0]?.name || "";
   });
 
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById("upload-submit");
-    btn.disabled    = true;
-    btn.textContent = "Uploading… please wait";
+  if (form) {
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("upload-submit");
 
-    try {
+      if (btn && btn.disabled) return; // Prevent double trigger
+
+      // Field-level client validation before hitting the API
       const fd = new FormData(form);
-      await publishVideo(fd);
-      showToast("Video published!", "success");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-      form.reset();
-      document.getElementById("video-file-name").textContent = "";
-      document.getElementById("thumbnail-name").textContent  = "";
-      mountDashboardPage();
-    } catch (err) {
-      showToast(err.message, "error");
-    } finally {
-      btn.disabled    = false;
-      btn.textContent = "Publish Video";
-    }
-  });
+      const title       = fd.get("title")?.toString().trim();
+      const description = fd.get("description")?.toString().trim();
+      const videoFile   = fd.get("videoFile");
+      const thumbnail   = fd.get("thumbnail");
+
+      if (!title) {
+        showToast("Title is required", "error");
+        form.querySelector('[name="title"]')?.focus();
+        return;
+      }
+      if (!description) {
+        showToast("Description is required", "error");
+        form.querySelector('[name="description"]')?.focus();
+        return;
+      }
+      if (!videoFile || videoFile.size === 0) {
+        showToast("Video file is required — please select a video", "error");
+        return;
+      }
+      if (!thumbnail || thumbnail.size === 0) {
+        showToast("Thumbnail is required — please select an image", "error");
+        return;
+      }
+
+      // Check file size client-side (100MB)
+      if (videoFile.size > 100 * 1024 * 1024) {
+        showToast("Video file must be under 100MB", "error");
+        return;
+      }
+      if (thumbnail.size > 10 * 1024 * 1024) {
+        showToast("Thumbnail must be under 10MB", "error");
+        return;
+      }
+
+      if (btn) {
+        btn.disabled    = true;
+        btn.textContent = "Uploading… please wait";
+      }
+
+      try {
+        await publishVideo(fd);
+        showToast("Video published!", "success");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        form.reset();
+        document.getElementById("video-file-name").textContent = "";
+        document.getElementById("thumbnail-name").textContent  = "";
+        mountDashboardPage();
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        if (btn) {
+          btn.disabled    = false;
+          btn.textContent = "Publish Video";
+        }
+      }
+    };
+  }
 }
+

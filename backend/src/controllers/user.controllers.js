@@ -31,6 +31,18 @@ const registerUser = asynchandler(async (req, res) => {
         throw new apireject(400, "enter all credentials");
     }
 
+    if (!/^[a-zA-Z0-9_]{3,30}$/.test(uname)) {
+        throw new apireject(400, "Username must be 3-30 characters long and contain only alphanumeric characters and underscores");
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new apireject(400, "Invalid email format");
+    }
+
+    if (password.length < 8) {
+        throw new apireject(400, "Password must be at least 8 characters long");
+    }
+
     let existUser = await User.findOne({
         $or: [{ uname }, { email }]
     });
@@ -39,30 +51,29 @@ const registerUser = asynchandler(async (req, res) => {
         throw new apireject(400, "already exist user");
     }
 
-    let avtarLocalpath = req.files?.avtar?.[0]?.path;
-    let coverLocalpath = req.files?.coveravtar?.[0]?.path;
-    
-    if (!avtarLocalpath) {
-       throw new apireject(400, "upload avtar");
+    const avatarLocalpath = req.files?.avatar?.[0]?.path;
+    let coverLocalPath = null;
+    if (req.files && Array.isArray(req.files.cover) && req.files.cover.length > 0) {
+        coverLocalPath = req.files.cover[0].path;
     }
 
-    const avtar = await uploadOnCloudinary(avtarLocalpath);
-    
-    let cover = "";
-    if (coverLocalpath) {
-        cover = await uploadOnCloudinary(coverLocalpath);
+    if (!avatarLocalpath) {
+        throw new apireject(400, "avatar file is missing");
     }
 
-    if (!avtar) {
-        throw new apireject(400, "Cloudinary upload failed");
+    const avatar = await uploadOnCloudinary(avatarLocalpath);
+    const cover = await uploadOnCloudinary(coverLocalPath);
+
+    if (!avatar) {
+        throw new apireject(400, "avatar file is required");
     }
 
-    let user = await User.create({
+    const user = await User.create({
         uname: uname.toLowerCase(),
         email,
         password,
         fullname,
-        avtar: avtar.url,
+        avatar: avatar.url,
         cover: cover?.url || ""
     });
     
@@ -132,10 +143,10 @@ const RefreshAccesstoken = asynchandler(async (req, res) => {
         )
         const user = await User.findById(decoded?._id)
         if (!user) {
-            throw new apireject(401, "invalid refresh token user gadbadi")
+            throw new apireject(401, "Invalid refresh token")
         }
         if (incomingRefresh !== user?.refreshtoken) {
-            throw new apireject(401, "invalid refresh token in in db and req")
+            throw new apireject(401, "Refresh token is expired or used")
         }
         const options = {
             httpOnly: true,
@@ -244,34 +255,33 @@ const updateUserProfile = asynchandler(async (req, res) => {
         .json(new Apiresolve(200, {}, "updated profile"))
 })
 
-const updateavtar = asynchandler(async (req, res) => {
-    let avtarLocalpath = req.file?.path;
-    if (!avtarLocalpath) {   
-        throw new apireject(400, "upload avtar");
+const updateavatar = asynchandler(async (req, res) => {
+    const avatarLocalpath = req.file?.path
+
+    if (!avatarLocalpath) {
+        throw new apireject(400, "avatar file is missing")
     }
 
-    const avtar = await uploadOnCloudinary(avtarLocalpath);
-    if (!avtar) {
-        throw new apireject(400, "Cloudinary upload failed");
+    const avatar = await uploadOnCloudinary(avatarLocalpath);
+
+    if (!avatar.url) {
+        throw new apireject(400, "Error while uploading on cloudinary")
     }
+
     const updated = await User.findByIdAndUpdate(
         req.user._id,
         {
             $set: {
-                avtar: avtar.url
+                avatar: avatar.url + "?t=" + Date.now()
             }
         },
         { new: true }
     ).select("-password -refreshtoken")
-    if (!updated) {
-        throw new apireject(400, "avtar not updated")
-    }
-    res
-        .status(200)
-        .json(new Apiresolve(200, {}, "avtar updated successfully"))
+
+    return res.status(200).json(new Apiresolve(200, updated, "avatar updated successfully"))
 })
 
-const updatecoveravtar = asynchandler(async (req, res) => {
+const updatecover = asynchandler(async (req, res) => {
     const coverpath = req.file?.path
     if (!coverpath) {
         throw new apireject(400, "upload cover ");
@@ -285,7 +295,7 @@ const updatecoveravtar = asynchandler(async (req, res) => {
         req.user._id,
         {
             $set: {
-                cover: cover.url
+                cover: cover.url + "?t=" + Date.now()
             }
         },
         { new: true }
@@ -293,9 +303,29 @@ const updatecoveravtar = asynchandler(async (req, res) => {
     if (!updated) {
         throw new apireject(400, "cover not updated")
     }
-    res
-        .status(200)
-        .json(new Apiresolve(200, {}, "cover updated successfully"))
+    return res.status(200).json(new Apiresolve(200, updated, "cover image updated successfully"))
+})
+
+const removeAvatar = asynchandler(async (req, res) => {
+    const updated = await User.findByIdAndUpdate(
+        req.user._id,
+        { $unset: { avatar: 1 } },
+        { new: true }
+    ).select("-password -refreshtoken")
+
+    return res.status(200).json(new Apiresolve(200, updated, "Avatar removed successfully"))
+})
+
+const removeCover = asynchandler(async (req, res) => {
+    const updated = await User.findByIdAndUpdate(
+        req.user._id,
+        { $unset: { cover: 1 } },
+        { new: true }
+    ).select("-password -refreshtoken")
+    if (!updated) {
+        throw new apireject(400, "Failed to remove cover")
+    }
+    res.status(200).json(new Apiresolve(200, updated, "Cover removed successfully"))
 })
 
 
@@ -312,7 +342,7 @@ const getuserchannelprofile = asynchandler(async (req, res) => {
                 uname: uname.toLowerCase()
             }
         },
-        {   
+           {
             $lookup: {
                 from: "subscriptions", 
                 localField: "_id",
@@ -322,23 +352,19 @@ const getuserchannelprofile = asynchandler(async (req, res) => {
         },
         {   
             $lookup: {
-                from: "subscriptions", 
+                from: "subscriptions",
                 localField: "_id",
                 foreignField: "subscriber",
-                as: "subscribedChannels"
+                as: "subscribedTo"
             }
         },
         {
             $addFields: {
-                subscribersCount: {
-                    $size: "$subscribers"
-                },
-                subscribedChannelsCount: {
-                    $size: "$subscribedChannels"
-                },
+                subscribersCount: { $size: "$subscribers" },
+                channelSubscribedToCount: { $size: "$subscribedTo" },
                 issubscribed: {
                     $cond: {
-                        if: { $in: [req.user?._id, "$subscribers.subscriber"] }, 
+                        if: req.user?._id ? { $in: [new mongoose.Types.ObjectId(req.user._id), "$subscribers.subscriber"] } : false,
                         then: true,
                         else: false
                     }
@@ -350,9 +376,9 @@ const getuserchannelprofile = asynchandler(async (req, res) => {
                 fullname: 1,
                 uname: 1,
                 subscribersCount: 1,
-                subscribedChannelsCount: 1,
+                channelSubscribedToCount: 1,
                 issubscribed: 1,
-                avtar: 1,
+                avatar: 1,
                 cover: 1,
                 email: 1
             }
@@ -376,12 +402,12 @@ const getWatchHistory = asynchandler(async (req, res) => {
     const user = await User.aggregate([
         {
             $match: { 
-                _id: new mongoose.Types.ObjectId(req.user._id) // FIXED: Added 'new' keyword to avoid crashes
+                _id: new mongoose.Types.ObjectId(req.user._id)
             }
         },{
             $lookup: {
                 from: "videos",
-                localField: "watchHistory", // FIXED: Changed to camelCase to match database schema
+                localField: "watchHistory",
                 foreignField: "_id",
                 as: "watchHistoryDetails",
                 pipeline: [
@@ -396,7 +422,7 @@ const getWatchHistory = asynchandler(async (req, res) => {
                                     $project: {
                                         fullname: 1,
                                         uname: 1,
-                                        avtar: 1
+                                        avatar: 1
                                     }
                                 }
                             ]
@@ -404,7 +430,7 @@ const getWatchHistory = asynchandler(async (req, res) => {
                     },
                     {
                         $addFields: {
-                            ownerDetails: { // FIXED: Added the missing key name before $first
+                            ownerDetails: { 
                                 $first: "$ownerDetails"
                             }
                         }
@@ -423,4 +449,18 @@ const getWatchHistory = asynchandler(async (req, res) => {
         .json(new Apiresolve(200, user[0].watchHistoryDetails, "watch history fetched successfully"))
 })
 
-export { registerUser, loginUser, RefreshAccesstoken, logoutUser, updatePassword, getUserProfile, updateUserProfile, updateavtar, updatecoveravtar, getuserchannelprofile, getWatchHistory};
+export {
+    registerUser,
+    loginUser,
+    logoutUser,
+    RefreshAccesstoken,
+    updatePassword,
+    getUserProfile,
+    updateUserProfile,
+    updateavatar,
+    updatecover,
+    removeAvatar,
+    removeCover,
+    getuserchannelprofile,
+    getWatchHistory
+};

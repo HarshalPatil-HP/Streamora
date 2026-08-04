@@ -19,8 +19,8 @@ export function createHeader() {
 
   const displayName = isAuthenticated ? user.fullname || user.uname : "Guest";
   const avatar =
-    isAuthenticated && user.avtar
-      ? `<img src="${user.avtar}" class="h-full w-full object-cover" alt="" />`
+    isAuthenticated && user.avatar
+      ? `<img src="${user.avatar}" class="h-full w-full object-cover" alt="" />`
       : `<span>${getInitials(displayName)}</span>`;
 
   header.innerHTML = `
@@ -30,10 +30,19 @@ export function createHeader() {
       ${icons.menu}
     </button>
 
+    <!-- Brand name (mobile only, hides on lg+) -->
+    <a href="#/" class="flex items-center gap-2 select-none lg:hidden">
+      <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md overflow-hidden" style="background: #0A0A0A;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="12" height="12"><polygon points="4,3 16,10 4,17" fill="white"/></svg>
+      </div>
+      <span class="text-sm font-extrabold tracking-tight text-[#0A0A0A]">Stream<span class="text-[#888]">ora</span></span>
+    </a>
+
     <form id="search-form" class="relative flex-1 max-w-xl" role="search">
       <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#ABABAB]">
         ${icons.search}
       </span>
+
       <input
         type="search"
         name="q"

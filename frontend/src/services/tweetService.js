@@ -1,7 +1,7 @@
 import api from "./api.js";
 
-export async function getUserTweets(userId) {
-  const { data } = await api.get(`/tweets/user/${userId}`);
+export async function getUserTweets(userId, sort = "latest") {
+  const { data } = await api.get(`/tweets/user/${userId}?sort=${sort}`);
   return data.data;
 }
 

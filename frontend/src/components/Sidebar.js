@@ -27,20 +27,27 @@ export function createSidebar(currentPath = "/") {
     ? `#/channel/${user.uname}`
     : `#/login?redirect=/dashboard`;
 
-  const userAvatar = isAuthenticated && user.avtar
-    ? `<img src="${user.avtar}" class="h-full w-full object-cover" alt="" />`
+  const userAvatar = isAuthenticated && user.avatar
+    ? `<img src="${user.avatar}" class="h-full w-full object-cover" alt="" />`
     : `<span class="text-xs font-bold">${getInitials(user?.fullname || "U")}</span>`;
 
   sidebar.innerHTML = `
     <!-- Logo -->
     <div class="flex h-16 items-center gap-3 border-b border-[#1E1E1E] px-5">
-      <a href="#/" class="flex items-center gap-3 select-none">
-        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[#0A0A0A]">
-          ${icons.play}
+      <a href="#/" data-logo-link class="flex items-center gap-2.5 select-none">
+        <!-- Streamora icon mark: S inside rounded square with gradient -->
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg overflow-hidden"
+             style="background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="16" height="16" fill="none">
+            <polygon points="4,3 16,10 4,17" fill="#0A0A0A"/>
+          </svg>
         </div>
+        <!-- Wordmark -->
         <div>
-          <h1 class="text-base font-bold tracking-tight text-white">Streamora</h1>
-          <p class="text-[10px] font-medium uppercase tracking-widest text-[#555]">Watch &amp; Connect</p>
+          <div class="flex items-baseline gap-0.5">
+            <span class="text-[15px] font-extrabold tracking-tight text-white leading-none">Stream</span><span class="text-[15px] font-extrabold tracking-tight leading-none" style="color: #777;">ora</span>
+          </div>
+          <p class="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#444] leading-none mt-0.5">Watch &amp; Connect</p>
         </div>
       </a>
       <button id="sidebar-close" class="ml-auto flex h-7 w-7 items-center justify-center rounded-lg text-[#555] hover:bg-[#1E1E1E] hover:text-white lg:hidden" aria-label="Close sidebar">
@@ -116,7 +123,7 @@ export function bindSidebarEvents(sidebar) {
     overlay?.classList.add("hidden");
   });
 
-  sidebar.querySelectorAll("[data-nav-link]").forEach((link) => {
+  sidebar.querySelectorAll("[data-nav-link], [data-logo-link]").forEach((link) => {
     link.addEventListener("click", () => {
       sidebar.classList.add("-translate-x-full");
       overlay?.classList.add("hidden");

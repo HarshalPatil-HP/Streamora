@@ -31,3 +31,18 @@ export const authmiddleware = asynchandler(async (req, res, next) => {
         throw new apireject(401, error?.message || "Invalid access token");
     }
 });
+
+// Like authmiddleware but never throws — attaches user if token valid, otherwise continues as guest
+export const optionalAuth = async (req, res, next) => {
+    try {
+        const token = req.cookies?.accesstoken || req.header("Authorization")?.replace("Bearer ", "");
+        if (token) {
+            const decoded = jwt.verify(token, process.env.ACCESS_TOKEN);
+            const user = await User.findById(decoded?._id).select("-password -refreshtoken");
+            if (user) req.user = user;
+        }
+    } catch {
+        // Not authenticated — that's OK for optional routes
+    }
+    next();
+};

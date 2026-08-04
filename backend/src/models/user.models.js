@@ -14,12 +14,12 @@ let userschema=new Schema({
         index:true
 
     },
-    avtar:{
-        type:String,
-        required:true,
+    avatar: {
+        type: String,
+        required: true,
     },
-    cover:{
-          type:String
+    cover: {
+        type: String,
     },
     watchHistory:[
         {

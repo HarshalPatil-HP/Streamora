@@ -142,7 +142,8 @@
      Video Grid
   ───────────────────────────────────────────────────── */
   .video-grid {
-    @apply grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+    @apply grid gap-5;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   }
 
   /* ─────────────────────────────────────────────────────
@@ -195,4 +196,33 @@
   ───────────────────────────────────────────────────── */
   .divider      { @apply my-4 border-t border-[#E8E8E8]; }
   .divider-dark { @apply my-4 border-t border-[#252525]; }
+
+  /* ─────────────────────────────────────────────────────
+     Sort / Filter Pills (Home page)
+  ───────────────────────────────────────────────────── */
+  .sort-pill-active {
+    @apply border-[#0A0A0A] bg-[#0A0A0A] text-white;
+  }
+  .sort-pill-inactive {
+    @apply border-[#E8E8E8] bg-white text-[#555] hover:border-[#0A0A0A] hover:text-[#0A0A0A];
+  }
+
+  /* ─────────────────────────────────────────────────────
+     Like Button — Active / Liked State
+  ───────────────────────────────────────────────────── */
+  .btn-liked {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl
+           border border-red-200 bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-600
+           shadow-soft transition-all duration-200
+           hover:bg-red-100
+           active:scale-[0.98];
+  }
+
+  /* ─────────────────────────────────────────────────────
+     Playlist Modal Overlay
+  ───────────────────────────────────────────────────── */
+  .playlist-modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm;
+  }
 }
+

@@ -4,7 +4,9 @@ import { renderSkeletonGrid, renderEmptyState } from "../utils/ui.js";
 import { escapeHtml } from "../utils/format.js";
 
 export async function HomePage() {
-  const query = new URLSearchParams(window.location.hash.split("?")[1] || "").get("q") || "";
+  const hashQuery = new URLSearchParams(window.location.hash.split("?")[1] || "");
+  const query = hashQuery.get("q") || "";
+  const sort  = hashQuery.get("sort") || "latest";
 
   return `
     <div class="mb-8">
@@ -20,15 +22,22 @@ export async function HomePage() {
         <h1 class="page-title">Results for <span class="font-normal text-[#555]">"${escapeHtml(query)}"</span></h1>
         <p class="page-subtitle">Search results from the Streamora library</p>`
           : `
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 class="page-title">Discover</h1>
-            <p class="page-subtitle">Trending videos from creators on Streamora</p>
+            <p class="page-subtitle">Videos from creators on Streamora</p>
           </div>
-          <div class="hidden items-center gap-2 sm:flex">
-            <button class="btn-secondary text-xs gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-              Filter
+          <!-- Filter pills -->
+          <div class="flex items-center gap-2" id="sort-pills">
+            <button data-sort="latest"
+              class="sort-pill ${sort === "latest" ? "sort-pill-active" : "sort-pill-inactive"} flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-semibold transition-all duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Latest
+            </button>
+            <button data-sort="trending"
+              class="sort-pill ${sort === "trending" ? "sort-pill-active" : "sort-pill-inactive"} flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-semibold transition-all duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+              Trending
             </button>
           </div>
         </div>`
@@ -42,14 +51,24 @@ export async function mountHomePage() {
   const container = document.getElementById("home-grid");
   if (!container) return;
 
-  const query = new URLSearchParams(window.location.hash.split("?")[1] || "").get("q") || "";
+  const hashQuery = new URLSearchParams(window.location.hash.split("?")[1] || "");
+  const query = hashQuery.get("q") || "";
+  const sort  = hashQuery.get("sort") || "latest";
+
+  // Wire up filter pills
+  document.querySelectorAll(".sort-pill").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const newSort = btn.dataset.sort;
+      const base = query ? `/?q=${encodeURIComponent(query)}&sort=${newSort}` : `/?sort=${newSort}`;
+      window.location.hash = base;
+    });
+  });
 
   try {
     const result = await getVideos({
       limit: 20,
       query: query || undefined,
-      sortBy: "createdAt",
-      sortType: "desc",
+      sort,
     });
     const videos = result?.docs || [];
 

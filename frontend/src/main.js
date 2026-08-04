@@ -71,8 +71,24 @@ async function render() {
 }
 
 async function bootstrap() {
-  await initAuth();
-  subscribe(() => refreshHeader());
+  const minSplashTime = new Promise((resolve) => setTimeout(resolve, 2500));
+  
+  const initPromise = initAuth().then(() => {
+    subscribe(() => refreshHeader());
+  });
+
+  await Promise.all([minSplashTime, initPromise]);
+
+  const splash = document.getElementById("splash-screen");
+  if (splash) {
+    splash.classList.add("opacity-0");
+    setTimeout(() => {
+      splash.remove();
+      document.body.classList.remove("overflow-hidden");
+    }, 700);
+  } else {
+    document.body.classList.remove("overflow-hidden");
+  }
 
   if (!window.location.hash) {
     window.location.hash = "#/";

@@ -67,27 +67,26 @@ export function LoginPage() {
 
 export function mountLoginPage() {
   const form = document.getElementById("login-form");
-  const btn  = document.getElementById("login-btn");
-  if (!form) return;
+  if (form) {
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const btn = document.getElementById("login-btn");
+      
+      if (btn && btn.disabled) return;
+      if (btn) { btn.disabled = true; btn.textContent = "Signing in..."; }
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const fd       = new FormData(form);
-    const email    = fd.get("email")?.toString().trim();
-    const password = fd.get("password")?.toString();
-
-    btn.disabled    = true;
-    btn.textContent = "Signing in…";
-
-    try {
-      await loginUser(email, password);
-      showToast("Welcome back!", "success");
-      navigate(getRedirectPath() || "/");
-      window.location.reload();
-    } catch (err) {
-      showToast(err.message || "Login failed", "error");
-      btn.disabled    = false;
-      btn.textContent = "Sign In";
-    }
-  });
+      try {
+        await loginUser(email, password);
+        const redirect = new URLSearchParams(window.location.hash.split("?")[1]).get("redirect");
+        window.location.hash = redirect ? `#${redirect}` : "#/";
+        showToast("Welcome back!", "success");
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = "Sign In"; }
+      }
+    };
+  }
 }

@@ -35,7 +35,7 @@ const getVideoComments = asynchandler(async (req, res) => {
                         $project: {
                             fullname: 1,
                             uname: 1,
-                            avtar: 1
+                            avatar: 1
                         }
                     }
                 ]
@@ -45,7 +45,28 @@ const getVideoComments = asynchandler(async (req, res) => {
             $addFields: {
                 owner: { $first: "$owner" }
             }
-        }
+        },
+        // Join likes for this comment to get count + current user's like
+        {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "comment",
+                as: "likes"
+            }
+        },
+        {
+            $addFields: {
+                likeCount: { $size: "$likes" },
+                isLikedByCurrentUser: {
+                    $in: [
+                        req.user?._id ? new mongoose.Types.ObjectId(req.user._id) : null,
+                        { $ifNull: ["$likes.likedBy", []] }
+                    ]
+                }
+            }
+        },
+        { $project: { likes: 0 } }  // Don't send full likes array to client
     ])
 
     const options = {
@@ -70,6 +91,10 @@ const addComment = asynchandler(async (req, res) => {
 
     if (!contend?.trim()) {
         throw new apireject(400, "Comment content is required")
+    }
+    
+    if (contend.length > 1000) {
+        throw new apireject(400, "Comment is too long (max 1000 characters)")
     }
 
     const video = await Video.findById(videoId)
@@ -100,6 +125,10 @@ const updateComment = asynchandler(async (req, res) => {
 
     if (!contend?.trim()) {
         throw new apireject(400, "Comment content is required")
+    }
+    
+    if (contend.length > 1000) {
+        throw new apireject(400, "Comment is too long (max 1000 characters)")
     }
 
     const comment = await Comment.findById(commentId)

@@ -7,7 +7,7 @@ import {
     deleteVideo,
     togglePublishStatus
 } from "../controllers/video.controller.js"
-import { authmiddleware } from "../middlewares/auth.middleware.js"
+import { authmiddleware, optionalAuth } from "../middlewares/auth.middleware.js"
 import { upload } from "../middlewares/multer.middleware.js"
 
 const router = Router()
@@ -23,7 +23,7 @@ router.route("/").post(
     publishAVideo
 )
 
-router.route("/:videoId").get(getVideoById)
+router.route("/:videoId").get(optionalAuth, getVideoById)
 router.route("/:videoId").delete(authmiddleware, deleteVideo)
 router.route("/:videoId").patch(
     authmiddleware,

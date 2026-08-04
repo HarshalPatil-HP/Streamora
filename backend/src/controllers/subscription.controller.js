@@ -67,7 +67,7 @@ const getUserChannelSubscribers = asynchandler(async (req, res) => {
                         $project: {
                             fullname: 1,
                             uname: 1,
-                            avtar: 1
+                            avatar: 1
                         }
                     }
                 ]
@@ -115,7 +115,7 @@ const getSubscribedChannels = asynchandler(async (req, res) => {
                         $project: {
                             fullname: 1,
                             uname: 1,
-                            avtar: 1
+                            avatar: 1
                         }
                     }
                 ]

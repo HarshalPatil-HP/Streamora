@@ -14,5 +14,10 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    minify: "esbuild",
+    target: "es2020",
+  },
+  esbuild: {
+    drop: ["console", "debugger"],
   },
 });

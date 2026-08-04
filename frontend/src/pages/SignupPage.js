@@ -70,16 +70,16 @@ export function SignupPage() {
                 <label class="flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border border-dashed border-[#2E2E3A] bg-[#252530] p-3 text-center hover:border-[#555] transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                   <span class="text-[10px] text-[#666]">Upload image</span>
-                  <input type="file" name="avtar" accept="image/*" required class="hidden" id="avtar-input" />
+                  <input type="file" name="avatar" accept="image/*" required class="hidden" id="avatar-input" />
                 </label>
-                <p id="avtar-name" class="mt-1 truncate text-[10px] text-[#666]"></p>
+                <p id="avatar-name" class="mt-1 truncate text-[10px] text-[#666]"></p>
               </div>
               <div>
                 <label class="mb-1.5 block text-xs font-medium text-[#888]">Cover <span class="text-[#555] font-normal">(opt.)</span></label>
                 <label class="flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border border-dashed border-[#2E2E3A] bg-[#252530] p-3 text-center hover:border-[#555] transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                   <span class="text-[10px] text-[#666]">Upload image</span>
-                  <input type="file" name="coveravtar" accept="image/*" class="hidden" id="cover-input" />
+                  <input type="file" name="cover" accept="image/*" class="hidden" id="cover-input" />
                 </label>
                 <p id="cover-name" class="mt-1 truncate text-[10px] text-[#666]"></p>
               </div>
@@ -107,35 +107,41 @@ export function SignupPage() {
 
 export function mountSignupPage() {
   const form = document.getElementById("signup-form");
-  const btn  = document.getElementById("signup-btn");
-  if (!form) return;
+  if (form) {
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("signup-btn");
+      if (btn && btn.disabled) return;
+
+      const fd = new FormData(form);
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Creating account…";
+      }
+
+      try {
+        await register(fd);
+        showToast("Account created! Please sign in.", "success");
+        navigate("/login");
+        window.location.reload();
+      } catch (err) {
+        showToast(err.message || "Signup failed", "error");
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Create Account";
+        }
+      }
+    };
+  }
 
   // Show filename when file is selected
-  document.getElementById("avtar-input")?.addEventListener("change", (e) => {
-    const el = document.getElementById("avtar-name");
+  document.getElementById("avatar-input")?.addEventListener("change", (e) => {
+    const el = document.getElementById("avatar-name");
     if (el) el.textContent = e.target.files[0]?.name || "";
   });
   document.getElementById("cover-input")?.addEventListener("change", (e) => {
     const el = document.getElementById("cover-name");
     if (el) el.textContent = e.target.files[0]?.name || "";
-  });
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const fd = new FormData(form);
-
-    btn.disabled    = true;
-    btn.textContent = "Creating account…";
-
-    try {
-      await register(fd);
-      showToast("Account created! Please sign in.", "success");
-      navigate("/login");
-      window.location.reload();
-    } catch (err) {
-      showToast(err.message || "Signup failed", "error");
-      btn.disabled    = false;
-      btn.textContent = "Create Account";
-    }
   });
 }

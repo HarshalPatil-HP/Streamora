@@ -17,19 +17,15 @@ if (fs.existsSync(backendEnv)) {
 import{app}from "./app.js"
 import connectionInstance from "./db/index.js"
 
-
-
-
-
 let port=process.env.PORT||8001
 
 connectionInstance()
 .then(()=>{
     app.listen(port,()=>{
-        console.log(`server is listning....${port}`);
-        
+        console.log(`Server started on port ${port}`)
     })
 })
 .catch((err)=>{
-    console.log("error occured here i think ",err);
+    console.error("Server failed to start:", err.message)
+    process.exit(1)
 })
