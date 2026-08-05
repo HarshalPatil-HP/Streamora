@@ -16,7 +16,7 @@ export const authLimiter = rateLimit({
 // ── Stricter limiter for signup (prevent mass account creation) ──
 export const signupLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // 5 signups per hour per IP
+  max: 500, // Loosened from 5 to 500
   standardHeaders: true,
   legacyHeaders: false,
   message: {
