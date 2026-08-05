@@ -89,7 +89,7 @@ const addVideoToPlaylist = asynchandler(async (req, res) => {
         videos: videoId,
       },
     },
-    { new: true },
+    { returnDocument: "after" },
   );
 
   return res
@@ -126,7 +126,7 @@ const removeVideoFromPlaylist = asynchandler(async (req, res) => {
         videos: videoId,
       },
     },
-    { new: true },
+    { returnDocument: "after" },
   );
 
   return res
@@ -188,7 +188,7 @@ const updatePlaylist = asynchandler(async (req, res) => {
         description: description || playlist.description,
       },
     },
-    { new: true },
+    { returnDocument: "after" },
   );
 
   return res

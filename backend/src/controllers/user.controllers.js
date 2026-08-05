@@ -198,7 +198,7 @@ const logoutUser = asynchandler(async (req, res) => {
       },
     },
     {
-      new: true,
+      returnDocument: "after",
     },
   );
   const options = {
@@ -265,7 +265,7 @@ const updateUserProfile = asynchandler(async (req, res) => {
         fullname: fullname,
       },
     },
-    { new: true },
+    { returnDocument: "after" },
   ).select("-password -refreshtoken");
   if (!updated) {
     throw new apireject(400, "email and fullname not updated");
@@ -294,7 +294,7 @@ const updateavatar = asynchandler(async (req, res) => {
         avatar: avatar.url + "?t=" + Date.now(),
       },
     },
-    { new: true },
+    { returnDocument: "after" },
   ).select("-password -refreshtoken");
 
   return res
@@ -319,7 +319,7 @@ const updatecover = asynchandler(async (req, res) => {
         cover: cover.url + "?t=" + Date.now(),
       },
     },
-    { new: true },
+    { returnDocument: "after" },
   ).select("-password -refreshtoken");
   if (!updated) {
     throw new apireject(400, "cover not updated");
@@ -333,7 +333,7 @@ const removeAvatar = asynchandler(async (req, res) => {
   const updated = await User.findByIdAndUpdate(
     req.user._id,
     { $unset: { avatar: 1 } },
-    { new: true },
+    { returnDocument: "after" },
   ).select("-password -refreshtoken");
 
   return res
@@ -345,7 +345,7 @@ const removeCover = asynchandler(async (req, res) => {
   const updated = await User.findByIdAndUpdate(
     req.user._id,
     { $unset: { cover: 1 } },
-    { new: true },
+    { returnDocument: "after" },
   ).select("-password -refreshtoken");
   if (!updated) {
     throw new apireject(400, "Failed to remove cover");

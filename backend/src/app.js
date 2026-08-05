@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 let app = express();
+app.set("trust proxy", 1);
 
 // ── CORS — environment-aware allowlist ──────────────
 const allowedOrigins =

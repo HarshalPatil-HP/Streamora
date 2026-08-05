@@ -234,7 +234,7 @@ const getVideoById = asynchandler(async (req, res) => {
     await VideoView.findOneAndUpdate(
       { videoId, identifier },
       { viewedAt: new Date() },
-      { upsert: true, new: true },
+      { upsert: true, returnDocument: "after" },
     );
     await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
   }
@@ -289,7 +289,7 @@ const updateVideo = asynchandler(async (req, res) => {
         ...(thumbnailUrl && { thumbnail: thumbnailUrl }),
       },
     },
-    { new: true },
+    { returnDocument: "after" },
   );
 
   return res

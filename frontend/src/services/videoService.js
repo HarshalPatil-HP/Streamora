@@ -11,16 +11,12 @@ export async function getVideoById(videoId) {
 }
 
 export async function publishVideo(formData) {
-  const { data } = await api.post("/videos", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await api.post("/videos", formData);
   return data.data;
 }
 
 export async function updateVideo(videoId, formData) {
-  const { data } = await api.patch(`/videos/${videoId}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await api.patch(`/videos/${videoId}`, formData);
   return data.data;
 }
 

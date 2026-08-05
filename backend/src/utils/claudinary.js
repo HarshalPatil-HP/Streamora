@@ -11,9 +11,20 @@ const uploadOnCloudinary = async (localFilePath) => {
 
     if (!localFilePath) return null;
 
-    const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: "auto",
-    });
+    const stats = fs.statSync(localFilePath);
+    const fileSizeInBytes = stats.size;
+
+    let response;
+    if (fileSizeInBytes > 10 * 1024 * 1024) {
+      // > 10MB
+      response = await cloudinary.uploader.upload_large(localFilePath, {
+        resource_type: "auto",
+      });
+    } else {
+      response = await cloudinary.uploader.upload(localFilePath, {
+        resource_type: "auto",
+      });
+    }
 
     // Clean up local temp file after successful upload
     if (fs.existsSync(localFilePath)) {
