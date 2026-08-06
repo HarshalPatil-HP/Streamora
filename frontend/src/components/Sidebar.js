@@ -126,28 +126,48 @@ export function createSidebar(currentPath = "/") {
   return sidebar;
 }
 
+/** Close sidebar and remove overlay immediately */
+export function closeSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("sidebar-overlay");
+  if (sidebar) sidebar.classList.add("-translate-x-full");
+  if (overlay) {
+    // Remove blur + dark bg immediately so the page is not stuck blurred
+    overlay.classList.add("hidden");
+    overlay.style.opacity = "0";
+    overlay.style.pointerEvents = "none";
+    // Reset after transition
+    setTimeout(() => {
+      overlay.style.opacity = "";
+      overlay.style.pointerEvents = "";
+    }, 350);
+  }
+}
+
 export function bindSidebarEvents(sidebar) {
   const closeBtn = sidebar.querySelector("#sidebar-close");
-  const overlay = document.getElementById("sidebar-overlay");
 
   closeBtn?.addEventListener("click", () => {
-    sidebar.classList.add("-translate-x-full");
-    overlay?.classList.add("hidden");
+    closeSidebar();
   });
 
   sidebar
     .querySelectorAll("[data-nav-link], [data-logo-link]")
     .forEach((link) => {
       link.addEventListener("click", () => {
-        sidebar.classList.add("-translate-x-full");
-        overlay?.classList.add("hidden");
+        closeSidebar();
       });
     });
 }
 
 export function openSidebar() {
   document.getElementById("sidebar")?.classList.remove("-translate-x-full");
-  document.getElementById("sidebar-overlay")?.classList.remove("hidden");
+  const overlay = document.getElementById("sidebar-overlay");
+  if (overlay) {
+    overlay.classList.remove("hidden");
+    overlay.style.opacity = "";
+    overlay.style.pointerEvents = "";
+  }
 }
 
 export function updateSidebarActiveState(currentPath) {
