@@ -21,10 +21,10 @@ export function renderVideoCard(video, ownerOverride = null) {
 
   return `
     <a href="#/watch/${id}"
-      class="group block overflow-hidden bg-transparent transition-all duration-300 hover:opacity-95"
+      class="video-card group block"
       data-video-card>
       <!-- Thumbnail -->
-      <div class="relative aspect-[16/9] overflow-hidden rounded-xl bg-[#F3F3F3]">
+      <div class="relative aspect-[16/9] overflow-hidden rounded-xl border border-[#E8E8E8] bg-[#F3F3F3]">
         ${
           thumbnail
             ? `<img src="${thumbnail}" alt="${title}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />`
@@ -41,7 +41,7 @@ export function renderVideoCard(video, ownerOverride = null) {
       </div>
 
       <!-- Info -->
-      <div class="mt-4 pr-4">
+      <div class="mt-3 px-1">
         <!-- Title -->
         <h3 class="line-clamp-2 text-base font-semibold leading-snug text-[#0A0A0A] mb-2" title="${title}">${title}</h3>
         

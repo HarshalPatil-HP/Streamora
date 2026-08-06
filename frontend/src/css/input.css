@@ -144,6 +144,12 @@
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   }
 
+  .video-card {
+    @apply overflow-hidden rounded-2xl border border-[#E8E8E8] bg-white pb-4
+           shadow-soft transition-all duration-300
+           hover:shadow-card hover:border-[#D0D0D0];
+  }
+
   /* ─────────────────────────────────────────────────────
      Skeleton Loader
   ───────────────────────────────────────────────────── */
@@ -252,6 +258,7 @@
   .search-blur-overlay.active {
     opacity: 1;
     pointer-events: auto;
+    overflow-y: auto;
   }
 
   /* ─────────────────────────────────────────────────────

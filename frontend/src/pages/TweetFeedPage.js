@@ -233,7 +233,7 @@ export async function mountTweetFeedPage() {
         const owner = t.owner?.uname
           ? t.owner
           : ownerCache[ownerId] || { uname: "creator", fullname: "Creator" };
-        return renderTweetItem(t, owner, isAuthenticated);
+        return renderTweetItem(t, owner, true);
       })
       .join("")}</div>`;
 

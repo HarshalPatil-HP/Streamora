@@ -47,10 +47,59 @@ const getPlaylistById = asynchandler(async (req, res) => {
     throw new apireject(400, "Invalid playlist id");
   }
 
-  const playlist = await Playlist.findById(playlistId).populate(
-    "videos",
-    "title thumbnail videofile views durationNumber",
-  );
+  const results = await Playlist.aggregate([
+    { $match: { _id: new mongoose.Types.ObjectId(playlistId) } },
+    // Populate playlist owner
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+        pipeline: [{ $project: { fullname: 1, uname: 1, avatar: 1 } }],
+      },
+    },
+    { $addFields: { owner: { $first: "$owner" } } },
+    // Populate videos with their owner details
+    {
+      $lookup: {
+        from: "videos",
+        localField: "videos",
+        foreignField: "_id",
+        as: "videos",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "ownerDetails",
+              pipeline: [{ $project: { fullname: 1, uname: 1, avatar: 1 } }],
+            },
+          },
+          {
+            $addFields: {
+              ownerDetails: { $first: "$ownerDetails" },
+            },
+          },
+          {
+            $project: {
+              title: 1,
+              thumbnail: 1,
+              videofile: 1,
+              views: 1,
+              durationNumber: 1,
+              createdAt: 1,
+              owner: 1,
+              ownerDetails: 1,
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  const playlist = results[0] || null;
 
   if (!playlist) {
     throw new apireject(404, "Playlist not found");
