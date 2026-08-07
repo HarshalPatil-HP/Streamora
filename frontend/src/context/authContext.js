@@ -69,6 +69,10 @@ export function requireAuth(redirectPath) {
   const redirect = redirectPath
     ? `?redirect=${encodeURIComponent(redirectPath)}`
     : "";
-  window.location.hash = `#/login${redirect}`;
+  const path = `/login${redirect}`;
+  if (window.location.pathname + window.location.search !== path) {
+    window.history.pushState(null, "", path);
+    window.dispatchEvent(new Event("popstate"));
+  }
   return false;
 }

@@ -20,7 +20,7 @@ export function renderVideoCard(video, ownerOverride = null) {
   const ownerUname = owner.uname || null;
 
   return `
-    <a href="#/watch/${id}"
+    <a href="/watch/${id}"
       class="video-card group block"
       data-video-card>
       <!-- Thumbnail -->
@@ -54,7 +54,7 @@ export function renderVideoCard(video, ownerOverride = null) {
         </div>
 
         <!-- Metadata Row -->
-        <p class="text-sm text-[#888] truncate ml-[42px]">${views} views • ${timeAgo}</p>
+        <p class="text-sm text-[#888] truncate">${views} views • ${timeAgo}</p>
       </div>
     </a>
   `;

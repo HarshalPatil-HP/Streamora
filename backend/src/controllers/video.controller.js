@@ -208,43 +208,33 @@ const getVideoById = asynchandler(async (req, res) => {
   const video = results[0];
 
   // ── View Deduplication (12-hour cooldown) ──────────────
-  // Identifier: userId for logged-in, or hash of IP+UA for guests
+  // Identifier: userId for logged-in
+  // Guests do NOT increment view count at all per spec
   const COOLDOWN_MS = 12 * 60 * 60 * 1000; // 12 hours
-  let identifier;
   if (req.user?._id) {
-    identifier = String(req.user._id);
-  } else {
-    const ip = req.ip || req.connection?.remoteAddress || "unknown";
-    const ua = req.headers["user-agent"] || "unknown";
-    identifier = crypto
-      .createHash("sha256")
-      .update(`${ip}:${ua}`)
-      .digest("hex");
-  }
+    const identifier = String(req.user._id);
+    const cutoff = new Date(Date.now() - COOLDOWN_MS);
+    const existingView = await VideoView.findOne({
+      videoId,
+      identifier,
+      viewedAt: { $gt: cutoff },
+    });
 
-  const cutoff = new Date(Date.now() - COOLDOWN_MS);
-  const existingView = await VideoView.findOne({
-    videoId,
-    identifier,
-    viewedAt: { $gt: cutoff },
-  });
+    if (!existingView) {
+      // Either first view ever, or cooldown has expired
+      await VideoView.findOneAndUpdate(
+        { videoId, identifier },
+        { viewedAt: new Date() },
+        { upsert: true, returnDocument: "after" },
+      );
+      await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
+    }
 
-  if (!existingView) {
-    // Either first view ever, or cooldown has expired
-    await VideoView.findOneAndUpdate(
-      { videoId, identifier },
-      { viewedAt: new Date() },
-      { upsert: true, returnDocument: "after" },
-    );
-    await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
-  }
-  // ───────────────────────────────────────────────────────
-
-  if (req.user?._id) {
     await User.findByIdAndUpdate(req.user._id, {
       $addToSet: { watchHistory: videoId },
     });
   }
+  // ───────────────────────────────────────────────────────
 
   return res
     .status(200)

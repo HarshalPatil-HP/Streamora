@@ -5,7 +5,7 @@ import {
   updateLayoutActiveState,
   refreshHeader,
 } from "./components/Layout.js";
-import { parseHash, getRouteRenderer } from "./router.js";
+import { parseHash, getRouteRenderer, navigate } from "./router.js";
 
 const app = document.getElementById("app");
 const renderRoute = getRouteRenderer();
@@ -47,7 +47,7 @@ async function render() {
             </div>
             <h2 class="text-2xl font-bold text-[#0A0A0A]">Page not found</h2>
             <p class="mt-2 max-w-xs text-sm text-[#888]">The page you're looking for doesn't exist or has been moved.</p>
-            <a href="#/" class="btn-primary mt-6">Go Home</a>
+            <a href="/" class="btn-primary mt-6">Go Home</a>
           </div>
         `;
       } else {
@@ -94,12 +94,23 @@ async function bootstrap() {
     document.body.classList.remove("overflow-hidden");
   }
 
-  if (!window.location.hash) {
-    window.location.hash = "#/";
-  } else {
-    await render();
+  if (window.location.hash.startsWith("#/")) {
+    const path = window.location.hash.slice(1);
+    window.history.replaceState(null, "", path);
   }
+
+  await render();
 }
 
-window.addEventListener("hashchange", render);
+window.addEventListener("popstate", render);
+
+document.addEventListener("click", (e) => {
+  const link = e.target.closest("a");
+  if (link && link.getAttribute("href")?.startsWith("/")) {
+    e.preventDefault();
+    const href = link.getAttribute("href");
+    navigate(href);
+  }
+});
+
 window.addEventListener("load", bootstrap);

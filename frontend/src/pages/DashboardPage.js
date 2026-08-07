@@ -219,7 +219,7 @@ export async function mountDashboardPage() {
               : renderEmptyState({
                   title: "No posts yet",
                   description: "You haven't posted any community updates.",
-                  actionHtml: `<a href="#/tweets" class="btn-primary">Go to Community</a>`,
+                  actionHtml: `<a href="/tweets" class="btn-primary">Go to Community</a>`,
                 })
         }
       </div>

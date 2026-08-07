@@ -35,8 +35,8 @@ export function createSidebar(currentPath = "/") {
     "fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-[#0A0A0A] transition-transform duration-300 lg:static lg:translate-x-0";
 
   const channelLink = isAuthenticated
-    ? `#/channel/${user.uname}`
-    : `#/login?redirect=/dashboard`;
+    ? `/channel/${user.uname}`
+    : `/login?redirect=/dashboard`;
 
   const userAvatar =
     isAuthenticated && user.avatar
@@ -46,7 +46,7 @@ export function createSidebar(currentPath = "/") {
   sidebar.innerHTML = `
     
     <div class="flex h-16 items-center gap-3 border-b border-[#1E1E1E] px-5">
-      <a href="#/" data-logo-link class="flex items-center gap-2.5 select-none">
+      <a href="/" data-logo-link class="flex items-center gap-2.5 select-none">
         <!-- Streamora icon mark: S inside rounded square with gradient -->
         <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg overflow-hidden"
              style="background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);">
@@ -75,7 +75,7 @@ export function createSidebar(currentPath = "/") {
           const isActive = item.match(currentPath);
           const href =
             item.protected && !isAuthenticated
-              ? `#/login?redirect=${encodeURIComponent(item.href.replace("#", ""))}`
+              ? `/login?redirect=${encodeURIComponent(item.href.replace("#", ""))}`
               : item.href;
           return `
             <a href="${href}" data-nav-link
@@ -117,7 +117,7 @@ export function createSidebar(currentPath = "/") {
         <div class="rounded-xl bg-[#141414] p-4">
           <p class="text-sm font-semibold text-white">Join Streamora</p>
           <p class="mt-1 text-xs leading-relaxed text-[#666]">Upload videos &amp; connect with creators</p>
-          <a href="#/signup" class="btn-primary-dark mt-3 w-full text-center text-xs">Get Started</a>
+          <a href="/signup" class="btn-primary-dark mt-3 w-full text-center text-xs">Get Started</a>
         </div>`
       }
     </div>

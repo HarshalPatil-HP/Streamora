@@ -25,8 +25,17 @@ let likeschema = new Schema(
 
 // Sparse unique indexes to prevent duplicate likes per user
 // sparse: true means null values don't conflict with each other
-likeschema.index({ likedBy: 1, video: 1 }, { unique: true, sparse: true });
-likeschema.index({ likedBy: 1, comment: 1 }, { unique: true, sparse: true });
-likeschema.index({ likedBy: 1, tweet: 1 }, { unique: true, sparse: true });
+likeschema.index(
+  { likedBy: 1, video: 1 },
+  { unique: true, partialFilterExpression: { video: { $exists: true } } },
+);
+likeschema.index(
+  { likedBy: 1, comment: 1 },
+  { unique: true, partialFilterExpression: { comment: { $exists: true } } },
+);
+likeschema.index(
+  { likedBy: 1, tweet: 1 },
+  { unique: true, partialFilterExpression: { tweet: { $exists: true } } },
+);
 
 export let Like = mongoose.model("Like", likeschema);

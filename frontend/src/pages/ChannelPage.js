@@ -116,7 +116,7 @@ export async function mountChannelPage(params) {
                    ${channel.issubscribed ? "Subscribed" : "Subscribe"}
                  </button>`
                 : `<div class="mb-1">
-                   <a href="#/dashboard" class="btn-secondary gap-2">
+                   <a href="/dashboard" class="btn-secondary gap-2">
                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
                      Manage Channel
                    </a>
@@ -291,7 +291,7 @@ export async function mountChannelPage(params) {
     root.innerHTML = renderEmptyState({
       title: "Channel not found",
       description: err.message || `User @${username} doesn't exist.`,
-      actionHtml: `<a href="#/" class="btn-primary">Go Home</a>`,
+      actionHtml: `<a href="/" class="btn-primary">Go Home</a>`,
     });
   }
 }
@@ -323,7 +323,7 @@ function renderTweet(tweet, channel) {
 
 function renderPlaylist(pl) {
   return `
-    <a href="#/playlist/${pl._id}" class="surface-card hover:shadow-card transition-shadow block">
+    <a href="/playlist/${pl._id}" class="surface-card hover:shadow-card transition-shadow block">
       <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3F3F3]">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
       </div>
