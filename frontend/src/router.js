@@ -35,7 +35,7 @@ const routes = [
     component: WatchPage,
     mount: mountWatchPage,
     layout: true,
-    protected: true,
+    public: true,
   },
   {
     path: "/channel/:username",
@@ -92,12 +92,12 @@ function matchRoute(pathname) {
 }
 
 export function parseHash() {
-  const pathname = window.location.pathname || "/";
+  const hash = window.location.hash.slice(1) || "/";
+  const [pathPart, queryPart] = hash.split("?");
+  const pathname = pathPart || "/";
   const matched = matchRoute(pathname);
 
-  const query = Object.fromEntries(
-    new URLSearchParams(window.location.search || ""),
-  );
+  const query = Object.fromEntries(new URLSearchParams(queryPart || ""));
 
   if (matched) {
     return {
@@ -112,9 +112,7 @@ export function parseHash() {
 }
 
 export function navigate(path) {
-  if (window.location.pathname + window.location.search === path) return;
-  window.history.pushState(null, "", path);
-  window.dispatchEvent(new Event("popstate"));
+  window.location.hash = path.startsWith("#") ? path : `#${path}`;
 }
 
 export function getRedirectPath() {

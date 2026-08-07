@@ -32,7 +32,7 @@ export function createHeader() {
     </button>
 
     <!-- Brand name (mobile only, hides on lg+) -->
-    <a href="/" class="header-collapsible flex items-center gap-2 select-none lg:hidden">
+    <a href="#/" class="header-collapsible flex items-center gap-2 select-none lg:hidden">
       <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md overflow-hidden" style="background: #0A0A0A;">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="12" height="12"><polygon points="4,3 16,10 4,17" fill="white"/></svg>
       </div>
@@ -89,11 +89,11 @@ export function createHeader() {
             <p class="text-[11px] font-semibold uppercase tracking-wider text-[#ABABAB]">Signed in as</p>
             <p class="mt-0.5 truncate text-sm font-semibold text-[#0A0A0A]">${displayName}</p>
           </div>
-          <a href="/channel/${user.uname}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-[#555] transition-colors hover:bg-[#F9F9F9] hover:text-[#0A0A0A]">
+          <a href="#/channel/${user.uname}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-[#555] transition-colors hover:bg-[#F9F9F9] hover:text-[#0A0A0A]">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             Your Channel
           </a>
-          <a href="/dashboard" class="flex items-center gap-2 px-4 py-2.5 text-sm text-[#555] transition-colors hover:bg-[#F9F9F9] hover:text-[#0A0A0A]">
+          <a href="#/dashboard" class="flex items-center gap-2 px-4 py-2.5 text-sm text-[#555] transition-colors hover:bg-[#F9F9F9] hover:text-[#0A0A0A]">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
             Dashboard
           </a>
@@ -104,8 +104,8 @@ export function createHeader() {
           </button>
         `
             : `
-          <a href="/login" class="flex items-center gap-2 px-4 py-2.5 text-sm text-[#555] hover:bg-[#F9F9F9] hover:text-[#0A0A0A]">Sign In</a>
-          <a href="/signup" class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#0A0A0A] hover:bg-[#F9F9F9]">Create Account</a>
+          <a href="#/login" class="flex items-center gap-2 px-4 py-2.5 text-sm text-[#555] hover:bg-[#F9F9F9] hover:text-[#0A0A0A]">Sign In</a>
+          <a href="#/signup" class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#0A0A0A] hover:bg-[#F9F9F9]">Create Account</a>
         `
         }
       </div>
@@ -150,7 +150,6 @@ function enterSearchMode(header) {
     document.body.appendChild(overlay);
   }
   overlay.classList.add("active");
-  document.body.classList.add("overflow-hidden");
 
   // Focus the input
   const input = header.querySelector("#search-input");
@@ -191,7 +190,6 @@ function exitSearchMode(header) {
   // Remove content blur overlay
   const overlay = document.getElementById("search-blur-overlay");
   if (overlay) overlay.classList.remove("active");
-  document.body.classList.remove("overflow-hidden");
 
   // Blur the input
   const input = header.querySelector("#search-input");

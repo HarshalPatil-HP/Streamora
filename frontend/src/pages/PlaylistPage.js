@@ -36,7 +36,7 @@ function renderPlaylistItem(video, index, playlistId, isOwner) {
       <span class="hidden sm:flex h-full w-6 shrink-0 items-center justify-center text-xs font-medium text-[#ABABAB]">${index + 1}</span>
 
       <!-- Thumbnail -->
-      <a href="/watch/${id}" class="relative shrink-0 w-[140px] sm:w-[168px] aspect-[16/9] overflow-hidden rounded-lg border border-[#E8E8E8] bg-[#F3F3F3]">
+      <a href="#/watch/${id}" class="relative shrink-0 w-[140px] sm:w-[168px] aspect-[16/9] overflow-hidden rounded-lg border border-[#E8E8E8] bg-[#F3F3F3]">
         ${
           thumbnail
             ? `<img src="${thumbnail}" alt="${title}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />`
@@ -53,7 +53,7 @@ function renderPlaylistItem(video, index, playlistId, isOwner) {
 
       <!-- Info -->
       <div class="min-w-0 flex-1 py-0.5">
-        <a href="/watch/${id}" class="block">
+        <a href="#/watch/${id}" class="block">
           <h3 class="line-clamp-2 text-sm font-semibold leading-snug text-[#0A0A0A] group-hover:text-[#333]" title="${title}">${title}</h3>
         </a>
         <div class="mt-1.5 flex items-center gap-2">

@@ -84,7 +84,7 @@ export async function mountWatchPage(params) {
 
             <!-- Creator row -->
             <div class="flex items-center justify-between gap-3 flex-wrap">
-              <a href="${videoOwner.uname ? `/channel/${escapeHtml(videoOwner.uname)}` : "#"}" class="flex items-center gap-3 group min-w-0">
+              <a href="${videoOwner.uname ? `#/channel/${escapeHtml(videoOwner.uname)}` : "#"}" class="flex items-center gap-3 group min-w-0">
                 <div class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#0A0A0A] text-xs font-bold text-white">
                   ${videoOwner.avatar ? `<img src="${escapeHtml(videoOwner.avatar)}" class="h-full w-full object-cover" alt="" />` : getInitials(videoOwner.fullname || videoOwner.uname || "C")}
                 </div>
@@ -164,7 +164,7 @@ export async function mountWatchPage(params) {
             `
                 : `
               <div class="mb-5 rounded-xl border border-[#E8E8E8] bg-[#F9F9F9] p-4 text-sm text-[#555]">
-                <a href="/login?redirect=/watch/${id}" class="font-semibold text-[#0A0A0A] underline underline-offset-2">Sign in</a> to join the conversation
+                <a href="#/login?redirect=/watch/${id}" class="font-semibold text-[#0A0A0A] underline underline-offset-2">Sign in</a> to join the conversation
               </div>`
             }
             <div id="comments-list" class="space-y-5">
@@ -425,7 +425,7 @@ export async function mountWatchPage(params) {
       title: "Video not found",
       description:
         err.message || "This video may have been removed or is unavailable.",
-      actionHtml: `<a href="/" class="btn-primary">Back to Home</a>`,
+      actionHtml: `<a href="#/" class="btn-primary">Back to Home</a>`,
     });
   }
 }

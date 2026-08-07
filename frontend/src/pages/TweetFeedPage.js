@@ -5,7 +5,6 @@ import { getVideos } from "../services/videoService.js";
 import { getAuthState, requireAuth } from "../context/authContext.js";
 import { renderSpinner, renderEmptyState, showToast } from "../utils/ui.js";
 import { escapeHtml, formatDate, getInitials } from "../utils/format.js";
-import { navigate } from "../router.js";
 
 export function TweetFeedPage() {
   const { isAuthenticated, user } = getAuthState();
@@ -73,7 +72,7 @@ export function TweetFeedPage() {
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ABABAB" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
             </div>
             <p class="text-sm text-[#555]">
-              <a href="/login?redirect=/tweets" class="font-semibold text-[#0A0A0A] underline underline-offset-2">Sign in</a>
+              <a href="#/login?redirect=/tweets" class="font-semibold text-[#0A0A0A] underline underline-offset-2">Sign in</a>
               to post and interact with the community.
             </p>
           </div>
@@ -99,7 +98,7 @@ export async function mountTweetFeedPage() {
   // ── Sort Pills ────────────────────────────────────────
   document.querySelectorAll("#tweet-sort-pills .sort-pill").forEach((btn) => {
     btn.addEventListener("click", () => {
-      navigate(`/tweets?sort=${btn.dataset.sort}`);
+      window.location.hash = `#/tweets?sort=${btn.dataset.sort}`;
     });
   });
 
@@ -221,7 +220,7 @@ export async function mountTweetFeedPage() {
           : "Sign in to follow creators and see community posts.",
         actionHtml: isAuthenticated
           ? ""
-          : `<a href="/login?redirect=/tweets" class="btn-primary">Sign In</a>`,
+          : `<a href="#/login?redirect=/tweets" class="btn-primary">Sign In</a>`,
       });
       return;
     }
@@ -292,7 +291,7 @@ function renderTweetItem(tweet, owner, canLike) {
     <div class="surface-card hover:shadow-card transition-shadow duration-200">
       <div class="flex gap-3">
         <!-- Avatar -->
-        <a href="${owner.uname && owner.uname !== "creator" ? `/channel/${escapeHtml(owner.uname)}` : "#"}"
+        <a href="${owner.uname && owner.uname !== "creator" ? `#/channel/${escapeHtml(owner.uname)}` : "#"}"
           class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#0A0A0A] text-xs font-bold text-white hover:opacity-80 transition-opacity">
           ${
             owner.avatar

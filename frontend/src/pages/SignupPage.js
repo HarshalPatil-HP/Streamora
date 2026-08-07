@@ -16,7 +16,7 @@ export function SignupPage() {
       <div class="relative w-full max-w-sm">
         <!-- Logo -->
         <div class="mb-8 text-center">
-          <a href="/" class="inline-flex items-center gap-3 select-none">
+          <a href="#/" class="inline-flex items-center gap-3 select-none">
             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#0A0A0A]">
               ${playIcon}
             </div>
@@ -94,12 +94,12 @@ export function SignupPage() {
           <div class="border-t border-[#252530] px-8 py-4 text-center">
             <p class="text-sm text-[#666]">
               Already have an account?
-              <a href="/login" class="font-semibold text-white hover:underline ml-1">Sign in</a>
+              <a href="#/login" class="font-semibold text-white hover:underline ml-1">Sign in</a>
             </p>
           </div>
         </div>
 
-        <a href="/" class="mt-6 block text-center text-xs text-[#444] hover:text-[#888] transition-colors">← Back to Home</a>
+        <a href="#/" class="mt-6 block text-center text-xs text-[#444] hover:text-[#888] transition-colors">← Back to Home</a>
       </div>
     </div>
   `;

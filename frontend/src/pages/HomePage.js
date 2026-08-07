@@ -16,7 +16,7 @@ export async function HomePage() {
         query
           ? `
         <div class="flex items-center gap-3 mb-1">
-          <a href="/" class="flex items-center gap-1 text-xs font-medium text-[#888] hover:text-[#0A0A0A] transition-colors">
+          <a href="#/" class="flex items-center gap-1 text-xs font-medium text-[#888] hover:text-[#0A0A0A] transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
             All videos
           </a>
@@ -85,8 +85,8 @@ export async function mountHomePage() {
           ? "Try a different search term or browse all videos."
           : "Be the first creator to upload content!",
         actionHtml: query
-          ? `<a href="/" class="btn-secondary">Browse All</a>`
-          : `<a href="/signup" class="btn-primary">Become a Creator</a>`,
+          ? `<a href="#/" class="btn-secondary">Browse All</a>`
+          : `<a href="#/signup" class="btn-primary">Become a Creator</a>`,
       });
       return;
     }
