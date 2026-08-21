@@ -82,7 +82,6 @@ async function bootstrap() {
   });
 
   await Promise.all([minSplashTime, initPromise]);
-
   const splash = document.getElementById("splash-screen");
   if (splash) {
     splash.classList.add("opacity-0");
