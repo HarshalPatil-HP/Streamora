@@ -8,6 +8,7 @@ import { SignupPage, mountSignupPage } from "./pages/SignupPage.js";
 import { PlaylistPage, mountPlaylistPage } from "./pages/PlaylistPage.js";
 import { getAuthState } from "./context/authContext.js";
 
+
 const routes = [
   {
     path: "/",
@@ -107,7 +108,6 @@ export function parseHash() {
       notFound: false,
     };
   }
-
   return { pathname, params: query, route: null, notFound: true };
 }
 
