@@ -8,7 +8,6 @@ import { SignupPage, mountSignupPage } from "./pages/SignupPage.js";
 import { PlaylistPage, mountPlaylistPage } from "./pages/PlaylistPage.js";
 import { getAuthState } from "./context/authContext.js";
 
-
 const routes = [
   {
     path: "/",
@@ -36,7 +35,7 @@ const routes = [
     component: WatchPage,
     mount: mountWatchPage,
     layout: true,
-    public: true,
+    protected: true,
   },
   {
     path: "/channel/:username",
