@@ -134,8 +134,10 @@ export async function mountTweetFeedPage() {
             newTweet.owner || user,
             true,
           );
-          list.prepend(tweetEl.firstElementChild);
-          bindTweetLikes(tweetEl);
+          const tweetNode = tweetEl.firstElementChild;
+          list.prepend(tweetNode);
+          // Bind AFTER the node is in the DOM
+          bindTweetLikes(list);
         } else {
           mountTweetFeedPage();
         }

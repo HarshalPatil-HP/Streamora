@@ -207,9 +207,8 @@ const getVideoById = asynchandler(async (req, res) => {
 
   const video = results[0];
 
-  // ── View Deduplication (12-hour cooldown) ──────────────
-  // Identifier: userId for logged-in, or hash of IP+UA for guests
-  const COOLDOWN_MS = 12 * 60 * 60 * 1000; // 12 hours
+  // ── View Deduplication (permanent — 1 view per user/device, forever) ──
+  // Identifier: userId for logged-in users, or hash of IP+UA for guests
   let identifier;
   if (req.user?._id) {
     identifier = String(req.user._id);
@@ -222,23 +221,22 @@ const getVideoById = asynchandler(async (req, res) => {
       .digest("hex");
   }
 
-  const cutoff = new Date(Date.now() - COOLDOWN_MS);
+  // Check if this user/device has EVER viewed this video before
   const existingView = await VideoView.findOne({
-    videoId,
+    videoId: new mongoose.Types.ObjectId(videoId),
     identifier,
-    viewedAt: { $gt: cutoff },
   });
 
   if (!existingView) {
-    // Either first view ever, or cooldown has expired
-    await VideoView.findOneAndUpdate(
-      { videoId, identifier },
-      { viewedAt: new Date() },
-      { upsert: true, returnDocument: "after" },
-    );
+    // First time this user/device is watching — count it once, permanently
+    await VideoView.create({
+      videoId: new mongoose.Types.ObjectId(videoId),
+      identifier,
+      viewedAt: new Date(),
+    });
     await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
   }
-  // ───────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
 
   if (req.user?._id) {
     await User.findByIdAndUpdate(req.user._id, {
